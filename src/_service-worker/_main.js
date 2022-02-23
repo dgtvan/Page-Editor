@@ -1,7 +1,7 @@
-import * as NativeMessage from './native-message.js';
+//import * as NativeMessage from './native-message.js';
 import { Log } from '../common/log/es-log.js';
 import * as SWStayAwake from './service-stayawake.js';
-import * as FileStorage from './file-storage.js';
+import * as StorageEvents from './storage-events.js';
 import * as Test from './test.js';
 
 const _log = new Log('SW');
@@ -22,15 +22,15 @@ self.addEventListener('deactivate', event => {
 
 SWStayAwake.Intialize();
 
-FileStorage.Initialize();
+//StorageEvents.Initialize();
 
-NativeMessage.Intialize();
+//NativeMessage.Intialize();
 
 /*
  * RUN TEST
  */
 
-Test.Begin();
+//Test.Begin();
 
 
 

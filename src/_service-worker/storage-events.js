@@ -1,11 +1,12 @@
-import * as FileStorage from '../common/storage/file-storage.js';
+import { ScriptStorage } from '../common/storage/script-storage.js';
 import { Log } from '../common/log/es-log.js';
 
-const _log = new Log('SW-FileStorage');
+const _log = new Log('SW-ScriptStorage');
+const _scriptStorage = new ScriptStorage();
 
 export function Initialize() {
 
-    FileStorage.DumpAllFileName((filePath, fileContent) => {
+    _scriptStorage.DumpAllFileName((filePath, fileContent) => {
         _log.Info('Storage dump file name: ' + filePath);
     }, () => {
         //_log.Info('Storage dump begin');
@@ -13,11 +14,11 @@ export function Initialize() {
         //_log.Info('Storage dump end');
     });
 
-    FileStorage.AddRemoveListener((filePath, fileContent) => {
+    _scriptStorage.AddRemoveListener((filePath, fileContent) => {
         //_log.Info('');
     });
 
-    FileStorage.AddSetListener((filePath, fileContent) => {
+    _scriptStorage.AddSetListener((filePath, fileContent) => {
         
     });
 

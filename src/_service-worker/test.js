@@ -1,7 +1,7 @@
 import * as TestUtility from '../test/utility.js';
-import * as TestFileStorage from '../test/file-storage.js';
+//import * as TestScriptStorage from '../test/script-storage.js';
 
 export function Begin() {
-    TestFileStorage.Begin();
+    //TestScriptStorage.Begin();
     TestUtility.Begin();
 }

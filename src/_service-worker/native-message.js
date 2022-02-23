@@ -1,8 +1,9 @@
 import * as NativeMessage from '../common/native-message.js';
-import * as Storage from '../common/storage/file-storage.js';
+import { ScriptStorage } from '../common/storage/script-storage.js';
 import { Log } from '../common/log/es-log.js';
 
 const _log = new Log('SW-NativeMsg');
+const _scriptStorage = new ScriptStorage();
 
 export function Intialize() {
 
@@ -21,16 +22,16 @@ export function Intialize() {
         {
             case 'add':
             case 'modify':
-                Storage.Set(newFile.filePath, newFile.fileContent);
+                _scriptStorage.Set(newFile.filePath, newFile.fileContent);
                 break;
 
             case 'rename':
-                Storage.Remove(oldFile.filePath);
-                Storage.Set(newFile.filePath, newFile.fileContent);
+                _scriptStorage.Remove(oldFile.filePath);
+                _scriptStorage.Set(newFile.filePath, newFile.fileContent);
                 break;
 
             case 'delete':
-                Storage.Remove(oldFile.filePath);
+                _scriptStorage.Remove(oldFile.filePath);
                 break;
 
             default:

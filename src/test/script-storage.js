@@ -1,11 +1,12 @@
 import { Log } from "../common/log/es-log.js";
-import * as FileStorage from '../common/storage/file-storage.js';
+import { ScriptStorage } from '../common/storage/script-storage.js';
 import * as Utility from '../common/utility.js';
 import * as GlobalConstant from '../common/global-constant.js';
 
 import { Base } from './_test-base.js';
 
-const _log = new Log('Test-FileStorage');
+const _log = new Log('Test-ScriptStorage');
+const _scriptStorage = new ScriptStorage();
 const _base = new Base(_log, PreTest, PostTest);
 
 //#region Test Data
@@ -68,9 +69,9 @@ function Case_0() {
     let fileContent = _base64FileContent;
 
     let executePromise = new Promise((resolve, reject) => {
-        FileStorage.Set(filePath, fileContent, () => {
-            FileStorage.Get(filePath, (getFilePath, getFileContent) => {
-                FileStorage.Remove(filePath);
+        _scriptStorage.Set(filePath, fileContent, () => {
+            _scriptStorage.Get(filePath, (getFilePath, getFileContent) => {
+                _scriptStorage.Remove(filePath);
                 if (getFilePath === filePath && getFileContent === fileContent) {
                     resolve(_base.OK(Case_0));
                 } else {
@@ -103,9 +104,9 @@ function Case_1() {
     }
 
     let executePromise = new Promise((resolve, reject) => {
-        FileStorage.Set(filePath, fileContent, () => {
-            FileStorage.GetEx(filePath, (fileDetail) => {
-                FileStorage.Remove(filePath);
+        _scriptStorage.Set(filePath, fileContent, () => {
+            _scriptStorage.GetEx(filePath, (fileDetail) => {
+                _scriptStorage.Remove(filePath);
                 if (_base.AssertObjectEqual(Case_1, fileDetail, expectedFileBasic) &&
                     _base.AssertObjectEqual(Case_1, fileDetail.config, expectedConfig)) {
                     resolve(_base.OK(Case_1));
