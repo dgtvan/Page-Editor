@@ -1,5 +1,5 @@
 import * as NativeMessage from '../common/native-message.js';
-import * as Storage from '../common/file-storage.js';
+import * as Storage from '../common/storage/file-storage.js';
 import { Log } from '../common/log/es-log.js';
 
 const _log = new Log('SW-NativeMsg');

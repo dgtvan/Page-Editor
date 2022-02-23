@@ -37,10 +37,12 @@ export function Intialize() {
         CheckInjectableTabs();
     });
 
+    CheckInjectableTabs();
+
     _log.Info('Initialization completed.');
 }
 
-export function CheckInjectableTabs() {
+function CheckInjectableTabs() {
     chrome.tabs.query({ currentWindow: true }, (tabs) => {
         let promises = [];
 

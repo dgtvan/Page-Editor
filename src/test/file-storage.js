@@ -1,5 +1,5 @@
 import { Log } from "../common/log/es-log.js";
-import * as FileStorage from '../common/file-storage.js';
+import * as FileStorage from '../common/storage/file-storage.js';
 import * as Utility from '../common/utility.js';
 import * as GlobalConstant from '../common/global-constant.js';
 
