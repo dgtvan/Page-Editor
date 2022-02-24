@@ -17,22 +17,40 @@ export class ScriptStorage extends Storage {
         return singleInstance;
     }
 
-    Get(filePath, callback) {
-        super.Get(filePath, callback);
+    Get(filePath) {
+        return new Promise((resolve, reject) => {
+            super.Get(filePath).then(result => {
+                if (result == null) {
+                    resolve(result);
+                } else {
+                    resolve(this.#Resolver(result));
+                }
+            });
+        });
     }
 
-    GetEx(filePath, callback) {
-        super.Get(filePath, (filePath, fileContent) => {
-            callback?.(this.#ParseFileDetail(filePath, fileContent));
+    GetEx(filePath) {
+        return new Promise((resolve, reject) => {
+            super.Get(filePath).then(result => {
+                resolve(this.#ParseFileDetail(result.key, result.value));
+            });
         })
     }
 
-    Set(filePath, fileContent, callback) {
-        super.Set(filePath, fileContent, callback);
+    Set(filePath, fileContent) {
+        return new Promise((resolve, reject) => {
+            super.Set(filePath, fileContent).then(result => {
+                resolve(this.#Resolver(result));
+            });
+        })
     }
 
-    Remove(filePath, callback) {
-        super.Remove(filePath, callback);
+    Remove(filePath) {
+        return new Promise((resolve, reject) => {
+            super.Remove(filePath).then(result => {
+                resolve(this.#Resolver(result));
+            })
+        });
     }
 
     AddSetListener(handler) {
@@ -161,6 +179,13 @@ export class ScriptStorage extends Storage {
         });
 
         return config;
+    }
+
+    #Resolver(result) {
+        return {
+            path: result.key,
+            content: result.value
+        }
     }
 
 // function RemoveConfigData(fileContent) {

@@ -14,12 +14,8 @@ export function Initialize() {
 }
 
 function storage() {
-    _storage.Get(null, (key, value) => {
-        _log.Info('Storage dump key: ' + key);
-    }, () => {
-        //_log.Info('Storage dump begin');
-    }, () => {
-        //_log.Info('Storage dump end');
+    _storage.Get(null).then((result) => {
+        _log.Info('Storage dump key: ' + result.key);
     });
 }
 

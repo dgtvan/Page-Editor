@@ -11,27 +11,31 @@ export class Storage {
         this.#_partition = parition;
     }
 
-    Get(key, callback) {
+    Get(key) {
         let partitionedKey = this.#_partition + key;
-        let thisPartition = this.#_partition; // Funny fix huh?
+        let partition = this.#_partition; // Funny fix huh?
 
-        // Key is null meaning that it should retrive all data,
-        // then filter based on the partition.
         if (key == null) {
             partitionedKey = null;
         }
 
-        chrome.storage.local.get(partitionedKey, function(data) {
-            for (const [key, value] of Object.entries(data)) {
-                if (key.startsWith(thisPartition)) {
-                    let originalKey = key.substring(thisPartition.length);
-                    callback?.(originalKey, value);
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(partitionedKey, function(data) {
+                for (const [keyResult, valueResult] of Object.entries(data)) {
+                    if (keyResult.startsWith(partition)) {
+                        let keyWithoutPartition = keyResult.substring(partition.length);
+                        resolve({
+                            key: keyWithoutPartition,
+                            value: valueResult
+                        });
+                    }
                 }
-            }
+                resolve(null);
+            });
         });
     }
 
-    Set(key, value, callback) {
+    Set(key, value) {
         let partitionedKey = this.#_partition + key;
 
         let storageItem = {};
@@ -39,18 +43,24 @@ export class Storage {
 
         let refSetEventHandlers = this.#_setEventHandlers;
 
-        chrome.storage.local.set(storageItem, function() {
-            callback?.();
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.set(storageItem, function() {
 
-            refSetEventHandlers.forEach(handler => {
-                handler?.(partitionedKey, value);
-            })
+                refSetEventHandlers.forEach(async (handler) => {
+                    handler?.(key, value);
+                })
+
+                resolve({
+                    key: key,
+                    value: value
+                });
+
+            });
         });
     }
 
-    Remove(key, callback) {
+    Remove(key) {
         let partitionedKey = this.#_partition + key;
-        let thisPartition = this.#_partition;
 
         if (key == null) {
             partitionedKey = null;
@@ -58,13 +68,19 @@ export class Storage {
 
         let refRemoveEventHandler = this.#_removeEventHandler;
 
-        this.Get(key, (keyResult, valueResult) => {
-            let removalKey = thisPartition + keyResult;
-            chrome.storage.local.remove(removalKey, function() {
-                callback?.(keyResult, valueResult);
-                refRemoveEventHandler.forEach(handler => {
-                    handler?.(keyResult, valueResult);
-                })
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(partitionedKey, (value) => {
+                chrome.storage.local.remove(partitionedKey, () => {
+
+                    refRemoveEventHandler.forEach(async (handler) => {
+                        handler?.(key, value);
+                    })
+
+                    resolve({
+                        key: key,
+                        value: value
+                    });
+                });
             });
         })
     }

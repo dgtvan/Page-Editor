@@ -72,7 +72,7 @@ function PostTest() {
 
         FileNameHelper.FileNames.forEach((fileName, idx, arr) => {
             let promise = new Promise((resolve, reject) => {
-                _scriptStorage.Remove(fileName, () => {
+                _scriptStorage.Remove(fileName).then(() => {
                     resolve();
                 });
             });
@@ -90,15 +90,19 @@ function Case_0() {
     let fileContent = _base64FileContent;
 
     let executePromise = new Promise((resolve, reject) => {
-        _scriptStorage.Set(filePath, fileContent, () => {
-            _scriptStorage.Get(filePath, (getFilePath, getFileContent) => {
-                _scriptStorage.Remove(filePath);
-                if (getFilePath === filePath && getFileContent === fileContent) {
+
+        _scriptStorage.Set(filePath, fileContent).then(() => {
+
+            _scriptStorage.Get(filePath).then((result) => {
+
+                if (_base.AssertExact(Case_0, result.path, filePath) &&
+                    _base.AssertExact(Case_0, result.content, fileContent)) {
                     resolve(_base.OK(Case_0));
                 } else {
                     resolve(_base.NG(Case_0));
                 }
-            })
+
+            });
         });
     });
 
@@ -106,16 +110,11 @@ function Case_0() {
 }
 
 function Case_1() {
-    let fileName = 'test-file-storage-case-1';
-    let ext = '.js';
-    let filePath = FileNameHelper.Create(fileName + ext);
-    let fileContent = _base64FileContent;
-
     let expectedFileBasic = {
-        path: filePath,
-        name: fileName,
-        extension: ext,
-        content: Utility.Base64Decode(fileContent)
+        path: FileNameHelper.Create('test-file-storage-case-1.js'),
+        name: 'test-file-storage-case-1',
+        extension: '.js',
+        content: Utility.Base64Decode(_base64FileContent)
     }
 
     let expectedConfig = {
@@ -125,16 +124,20 @@ function Case_1() {
     }
 
     let executePromise = new Promise((resolve, reject) => {
-        _scriptStorage.Set(filePath, fileContent, () => {
-            _scriptStorage.GetEx(filePath, (fileDetail) => {
-                _scriptStorage.Remove(filePath);
+
+        _scriptStorage.Set(expectedFileBasic.path, _base64FileContent).then(() =>{
+
+            _scriptStorage.GetEx(expectedFileBasic.path).then(fileDetail => {
+                
                 if (_base.AssertObjectEqual(Case_1, fileDetail, expectedFileBasic) &&
                     _base.AssertObjectEqual(Case_1, fileDetail.config, expectedConfig)) {
                     resolve(_base.OK(Case_1));
                 } else {
                     resolve(_base.NG(Case_1));
                 }
-            })
+
+            });
+
         });
     });
 
@@ -142,16 +145,26 @@ function Case_1() {
 }
 
 function Case_2() {
-    let fileName = 'test-file-2.js';
-    let ext = '.js';
-    let filePath = FileNameHelper.Create(fileName + ext);
+    let filePath = FileNameHelper.Create('test-file-2.js');
+    let fileContent = _base64FileContent;
 
     let executePromise = new Promise((resolve, reject) => {
-        _scriptStorage.Set(filePath, 'fileContent', () => {
-            _scriptStorage.Remove(filePath, () => {
-                resolve(_base.OK(Case_2));
+
+        _scriptStorage.Set(filePath, fileContent).then(() => {
+
+            _scriptStorage.Remove(filePath).then(() => {
+
+                _scriptStorage.Get(filePath).then(result => {
+                    if (result == null)
+                    {
+                        resolve(_base.OK(Case_2));
+                    }
+                });
+
             });
+
         });
+
     });
 
     return executePromise;
