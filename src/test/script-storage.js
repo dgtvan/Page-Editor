@@ -44,10 +44,19 @@ const _base64FileContent = Utility.Base64Encode(_plainFileContent);
 export function Begin() {
     let testProcs = [
         Case_0,
-        Case_1
+        Case_1,
+        Case_2
     ];
 
     _base.Run(testProcs);
+}
+
+const FileNameHelper = {
+    FileNames: [],
+    Create: function(fileName) {
+        this.FileNames.push(fileName);
+        return fileName;
+    }
 }
 
 function PreTest() {
@@ -59,13 +68,25 @@ function PreTest() {
 
 function PostTest() {
     return new Promise((resolve, reject) => {
-        //_log.Info('POS-TEST');
-        resolve(true);
+        let promises = [];
+
+        FileNameHelper.FileNames.forEach((fileName, idx, arr) => {
+            let promise = new Promise((resolve, reject) => {
+                _scriptStorage.Remove(fileName, () => {
+                    resolve();
+                });
+            });
+            promises.push(promise);
+        });
+
+        Promise.allSettled(promises, () => {
+            resolve();
+        });
     });
 }
 
 function Case_0() {
-    let filePath = '/a/b/c/d.js';
+    let filePath = FileNameHelper.Create('/a/b/c/d.js');
     let fileContent = _base64FileContent;
 
     let executePromise = new Promise((resolve, reject) => {
@@ -87,7 +108,7 @@ function Case_0() {
 function Case_1() {
     let fileName = 'test-file-storage-case-1';
     let ext = '.js';
-    let filePath = fileName + ext;
+    let filePath = FileNameHelper.Create(fileName + ext);
     let fileContent = _base64FileContent;
 
     let expectedFileBasic = {
@@ -114,6 +135,22 @@ function Case_1() {
                     resolve(_base.NG(Case_1));
                 }
             })
+        });
+    });
+
+    return executePromise;
+}
+
+function Case_2() {
+    let fileName = 'test-file-2.js';
+    let ext = '.js';
+    let filePath = FileNameHelper.Create(fileName + ext);
+
+    let executePromise = new Promise((resolve, reject) => {
+        _scriptStorage.Set(filePath, 'fileContent', () => {
+            _scriptStorage.Remove(filePath, () => {
+                resolve(_base.OK(Case_2));
+            });
         });
     });
 

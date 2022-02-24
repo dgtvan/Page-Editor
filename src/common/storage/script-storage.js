@@ -17,22 +17,30 @@ export class ScriptStorage extends Storage {
         return singleInstance;
     }
 
-    DumpAllFileName(dataCallback, beginCallback, endCallback) {
-        chrome.storage.local.get(null, function(data) {
-            beginCallback?.();
-
-            for (const [key, value] of Object.entries(data)) {
-                dataCallback?.(key, value);
-            }
-
-            endCallback?.();
-        });
+    Get(filePath, callback) {
+        super.Get(filePath, callback);
     }
 
-    Get(filePath, callback) {
+    GetEx(filePath, callback) {
         super.Get(filePath, (filePath, fileContent) => {
             callback?.(this.#ParseFileDetail(filePath, fileContent));
         })
+    }
+
+    Set(filePath, fileContent, callback) {
+        super.Set(filePath, fileContent, callback);
+    }
+
+    Remove(filePath, callback) {
+        super.Remove(filePath, callback);
+    }
+
+    AddSetListener(handler) {
+        super.AddSetListener(handler);
+    }
+
+    AddSRemoveListener(handler) {
+        super.AddRemoveListener(handler);
     }
 
     #ParseFileDetail(filePath, fileContentRaw) {

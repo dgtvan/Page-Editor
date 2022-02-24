@@ -1,19 +1,29 @@
+import { Storage } from '../common/storage/_storage.js';
 import { ScriptStorage } from '../common/storage/script-storage.js';
 import { Log } from '../common/log/es-log.js';
 
 const _log = new Log('SW-ScriptStorage');
+
+const _storage = new Storage();
 const _scriptStorage = new ScriptStorage();
 
 export function Initialize() {
+    storage();
+    scriptStorage();
+    _log.Info('Initialization completed.');
+}
 
-    _scriptStorage.DumpAllFileName((filePath, fileContent) => {
-        _log.Info('Storage dump file name: ' + filePath);
+function storage() {
+    _storage.Get(null, (key, value) => {
+        _log.Info('Storage dump key: ' + key);
     }, () => {
         //_log.Info('Storage dump begin');
     }, () => {
         //_log.Info('Storage dump end');
     });
+}
 
+function scriptStorage() {
     _scriptStorage.AddRemoveListener((filePath, fileContent) => {
         //_log.Info('');
     });
@@ -21,6 +31,4 @@ export function Initialize() {
     _scriptStorage.AddSetListener((filePath, fileContent) => {
         
     });
-
-    _log.Info('Initialization completed.');
 }
