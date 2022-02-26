@@ -37,6 +37,11 @@ export function Intialize() {
         CheckInjectableTabs();
     });
 
+    chrome.tabs.onCreated.addListener(tab => {
+        // Do not need to do anything here!
+        // The event helps to wake up the service worker at the browser start up.
+    });
+
     CheckInjectableTabs();
 
     _log.Info('Initialization completed.');
