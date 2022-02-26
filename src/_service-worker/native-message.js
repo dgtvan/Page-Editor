@@ -1,6 +1,7 @@
 import * as NativeMessage from '../common/native-message.js';
 import { ScriptStorage } from '../common/storage/script-storage.js';
 import { Log } from '../common/log/es-log.js';
+import * as Utility from '../common/utility.js';
 
 const _log = new Log('SW-NativeMsg');
 const _scriptStorage = new ScriptStorage();
@@ -13,31 +14,38 @@ export function Intialize() {
         return 'Pong ' + messageContent;
     });
 
-    NativeMessage.AddMessageListener("ExternalFileChange", messageContent => {
-        let action = messageContent.action;
-        let oldFile = messageContent.oldFile;
-        let newFile = messageContent.newFile;
+    NativeMessage.AddMessageListener("ExternalFileChange", msg => {
 
-        switch (action)
+        _log.Info('Handler Recv ExternalFileChange. ');
+        if (msg.action == 'modify') {
+            _log.Info('Modify content \'' + Utility.Base64Decode(msg.oldFile.content) + '\'');
+        }
+
+        switch (msg.action)
         {
             case 'add':
+                _scriptStorage.Set(msg.newFile.path, msg.newFile.content);
+                break;
+
             case 'modify':
-                _scriptStorage.Set(newFile.filePath, newFile.fileContent);
+                _scriptStorage.Set(msg.oldFile.path, msg.oldFile.content);
                 break;
 
             case 'rename':
-                _scriptStorage.Remove(oldFile.filePath);
-                _scriptStorage.Set(newFile.filePath, newFile.fileContent);
+                _scriptStorage.Remove(msg.oldFile.path);
+                _scriptStorage.Set(msg.newFile.path, msg.newFile.content);
                 break;
 
             case 'delete':
-                _scriptStorage.Remove(oldFile.filePath);
+                _scriptStorage.Remove(msg.oldFile.path);
                 break;
 
             default:
                 _log.Error('Recv \'ExternalFileChange\' with actioin \'' + action + '\' which has not defined');
                 break;
         }
+
+        return true;
     });
 
     _log.Info('Initialization completed.');

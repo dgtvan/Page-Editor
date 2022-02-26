@@ -47,7 +47,16 @@ export function AddMessageListener(message, messageContentCallback)
 {   
     _socket.on(message, (messageContent, responseCallback) => {
 
-        _log.Info('Recv Message \'' + message + '\'. Content \'' + messageContent + '\'.');
+        let contentJson = JSON.stringify(messageContent);
+        let peakContent = '';
+        if (contentJson.length > 20)
+        {
+            peakContent = contentJson.substring(0, 20) + '...';
+        } else {
+            peakContent = contentJson;
+        }
+
+        _log.Info('Recv Message \'' + message + '\'. Peak content \'' + peakContent + '\'.');
 
         let responseContent = messageContentCallback?.(messageContent);
 
