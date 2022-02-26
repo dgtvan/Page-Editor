@@ -2,7 +2,7 @@
 
 It helps to inject custom javascript scripts to any web page.
 
-It is basically similar to other projects having the similar core features. However, this project is intended for super-users, like me who is a software developer, I'd like to have a powerful editor integrated, so I decided to integrate it Visual Studio Code via an extension which is my [another project
+It is basically similar to other projects having the similar core features. However, this project is intended for super-users who are software developers, they like to have a powerful editor integrated, so I decided to integrate it Visual Studio Code via an extension which is my [another project
 ](https://github.com/VanDng/PageEditor-VSCode).
 
 # Feature
