@@ -31,5 +31,6 @@ function scriptStorage() {
 
     _scriptStorage.AddRemoveListener((filePath, fileContent) => {
         //_log.Info('Remove. Path \'' + filePath + '\'. Content \'' + fileContent + '\'');
+        //_log.Info('Remove. Path \'' + filePath + '\'');
     });
 }

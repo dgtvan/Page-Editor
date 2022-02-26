@@ -2,14 +2,14 @@ import { Log } from '../log/es-log.js';
 import * as Utility from '../utility.js';
 import * as GlobalConstant from '../global-constant.js';
 
-import { Storage } from './_storage.js';
+import { FileStorage } from './file-storage.js';
 
 let singleInstance = null;
 
-export class ScriptStorage extends Storage {
+export class ScriptStorage extends FileStorage {
     constructor() {
         if (singleInstance == null) {
-            super('__PGE_Script__');
+            super('_SCRIPT_');
             singleInstance = this;
         } else {
             // Initialize necessary stuff
@@ -17,54 +17,22 @@ export class ScriptStorage extends Storage {
         return singleInstance;
     }
 
-    Get(filePath) {
+    GetEx(filePath) {
         return new Promise((resolve, reject) => {
             super.Get(filePath).then(result => {
                 if (result == null) {
                     resolve(result);
                 } else {
-                    resolve(this.#Resolver(result));
+                    resolve(this.#ParseFileDetail(result.path, result.content));
                 }
             });
-        });
-    }
-
-    GetEx(filePath) {
-        return new Promise((resolve, reject) => {
-            super.Get(filePath).then(result => {
-                resolve(this.#ParseFileDetail(result.key, result.value));
-            });
         })
-    }
-
-    Set(filePath, fileContent) {
-        return new Promise((resolve, reject) => {
-            super.Set(filePath, fileContent).then(result => {
-                resolve(this.#Resolver(result));
-            });
-        })
-    }
-
-    Remove(filePath) {
-        return new Promise((resolve, reject) => {
-            super.Remove(filePath).then(result => {
-                resolve(this.#Resolver(result));
-            })
-        });
-    }
-
-    AddSetListener(handler) {
-        super.AddSetListener(handler);
-    }
-
-    AddSRemoveListener(handler) {
-        super.AddRemoveListener(handler);
     }
 
     #ParseFileDetail(filePath, fileContentRaw) {
         //let fileContent = Utility.Base64Decode(fileContentRaw);
         let fileContent = fileContentRaw;
-        
+
         /*
         Never redefine the file content detail structure anywhere else!
         It's easy to forget when an update happens.
@@ -180,13 +148,6 @@ export class ScriptStorage extends Storage {
         });
 
         return config;
-    }
-
-    #Resolver(result) {
-        return {
-            path: result.key,
-            content: result.value
-        }
     }
 
 // function RemoveConfigData(fileContent) {
