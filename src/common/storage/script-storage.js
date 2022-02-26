@@ -62,8 +62,9 @@ export class ScriptStorage extends Storage {
     }
 
     #ParseFileDetail(filePath, fileContentRaw) {
-        let fileContent = Utility.Base64Decode(fileContentRaw);
-
+        //let fileContent = Utility.Base64Decode(fileContentRaw);
+        let fileContent = fileContentRaw;
+        
         /*
         Never redefine the file content detail structure anywhere else!
         It's easy to forget when an update happens.

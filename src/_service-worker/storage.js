@@ -26,11 +26,10 @@ function storage() {
 
 function scriptStorage() {
     _scriptStorage.AddSetListener((filePath, fileContent) => {
-        _log.Info('Add. Path \'' + filePath + '\'. Content \'' + Utility.Base64Decode(fileContent) + '\'');
-        //_log.Info('Add. Path \'' + filePath + '\'. Content \'' + JSON.stringify(fileContent) + '\'');
+        //_log.Info('Add. Path \'' + filePath + '\'. Content \'' + fileContent + '\'');
     });
 
     _scriptStorage.AddRemoveListener((filePath, fileContent) => {
-        //_log.Info('Remove. Path \'' + filePath + '\'. Content \'' + Utility.Base64Decode(fileContent) + '\'');
+        //_log.Info('Remove. Path \'' + filePath + '\'. Content \'' + fileContent + '\'');
     });
 }

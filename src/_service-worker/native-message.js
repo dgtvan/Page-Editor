@@ -16,24 +16,24 @@ export function Intialize() {
 
     NativeMessage.AddMessageListener("ExternalFileChange", msg => {
 
-        _log.Info('Handler Recv ExternalFileChange. ');
-        if (msg.action == 'modify') {
-            _log.Info('Modify content \'' + Utility.Base64Decode(msg.oldFile.content) + '\'');
-        }
+        // _log.Info('Handler Recv ExternalFileChange. ');
+        // if (msg.action == 'modify') {
+        //     _log.Info('Modify content \'' + Utility.Base64Decode(msg.oldFile.content) + '\'');
+        // }
 
         switch (msg.action)
         {
             case 'add':
-                _scriptStorage.Set(msg.newFile.path, msg.newFile.content);
+                _scriptStorage.Set(msg.newFile.path, Utility.Base64Decode(msg.newFile.content));
                 break;
 
             case 'modify':
-                _scriptStorage.Set(msg.oldFile.path, msg.oldFile.content);
+                _scriptStorage.Set(msg.oldFile.path, Utility.Base64Decode(msg.oldFile.content));
                 break;
 
             case 'rename':
                 _scriptStorage.Remove(msg.oldFile.path);
-                _scriptStorage.Set(msg.newFile.path, msg.newFile.content);
+                _scriptStorage.Set(msg.newFile.path, Utility.Base64Decode(msg.newFile.content));
                 break;
 
             case 'delete':

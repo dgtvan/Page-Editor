@@ -38,7 +38,6 @@ refreshOnChange=true
 
 const _plainFileContentNoConfig = _seedFileContent.replace('[[ConfigData]]', '');
 const _plainFileContent = _seedFileContent.replace('[[ConfigData]]', _configData);
-const _base64FileContent = Utility.Base64Encode(_plainFileContent);
 //#endregion Test Data
 
 export function Begin() {
@@ -87,7 +86,7 @@ function PostTest() {
 
 function Case_0() {
     let filePath = FileNameHelper.Create('/a/b/c/d.js');
-    let fileContent = _base64FileContent;
+    let fileContent = _plainFileContent;
 
     let executePromise = new Promise((resolve, reject) => {
 
@@ -114,7 +113,7 @@ function Case_1() {
         path: FileNameHelper.Create('test-file-storage-case-1.js'),
         name: 'test-file-storage-case-1',
         extension: '.js',
-        content: Utility.Base64Decode(_base64FileContent)
+        content: _plainFileContent
     }
 
     let expectedConfig = {
@@ -125,7 +124,7 @@ function Case_1() {
 
     let executePromise = new Promise((resolve, reject) => {
 
-        _scriptStorage.Set(expectedFileBasic.path, _base64FileContent).then(() =>{
+        _scriptStorage.Set(expectedFileBasic.path, _plainFileContent).then(() =>{
 
             _scriptStorage.GetEx(expectedFileBasic.path).then(fileDetail => {
                 
@@ -146,7 +145,7 @@ function Case_1() {
 
 function Case_2() {
     let filePath = FileNameHelper.Create('test-file-2.js');
-    let fileContent = _base64FileContent;
+    let fileContent = _plainFileContent;
 
     let executePromise = new Promise((resolve, reject) => {
 

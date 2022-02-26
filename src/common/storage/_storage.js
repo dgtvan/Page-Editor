@@ -61,6 +61,7 @@ export class Storage {
 
     Remove(key) {
         let partitionedKey = this.#_partition + key;
+        let partition = this.#_partition; // Funny fix huh?
 
         if (key == null) {
             partitionedKey = null;
@@ -69,18 +70,24 @@ export class Storage {
         let refRemoveEventHandler = this.#_removeEventHandler;
 
         return new Promise((resolve, reject) => {
-            chrome.storage.local.get(partitionedKey, (value) => {
-                chrome.storage.local.remove(partitionedKey, () => {
+            chrome.storage.local.get(partitionedKey, (data) => {
+                for (const [keyResult, valueResult] of Object.entries(data)) {
+                    if (keyResult.startsWith(partition)) {
+                        let keyWithoutPartition = keyResult.substring(partition.length);
 
-                    refRemoveEventHandler.forEach(async (handler) => {
-                        handler?.(key, value);
-                    })
+                        chrome.storage.local.remove(keyResult, () => {
+                            refRemoveEventHandler.forEach(async (handler) => {
+                                handler?.(keyWithoutPartition, valueResult);
+                            })
 
-                    resolve({
-                        key: key,
-                        value: value
-                    });
-                });
+                            resolve({
+                                key: keyWithoutPartition,
+                                value: valueResult
+                            });
+                        });
+
+                    }
+                }
             });
         })
     }
