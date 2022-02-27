@@ -21,16 +21,25 @@ export class Storage {
 
         return new Promise((resolve, reject) => {
             chrome.storage.local.get(partitionedKey, function(data) {
+
+                let pairs = [];
+
                 for (const [keyResult, valueResult] of Object.entries(data)) {
                     if (keyResult.startsWith(partition)) {
                         let keyWithoutPartition = keyResult.substring(partition.length);
-                        resolve({
+                        pairs.push({
                             key: keyWithoutPartition,
                             value: valueResult
                         });
                     }
                 }
-                resolve(null);
+
+                if (pairs.length > 0){
+                    resolve(pairs);
+                } else {
+                    resolve(null);
+                }
+
             });
         });
     }

@@ -16,10 +16,12 @@ export function Initialize() {
 
 function storage() {
     _storage.Get(null).then((result) => {
-        if (result == null || result == 'undefined' || result.key == null || result.key == 'undefined') {
+        if (result == null || result == 'undefined') {
             // Nothing
         } else {
-            _log.Info('Storage dump key: ' + result.key);
+            result.forEach(pair => {
+                _log.Info('Storage dump key: ' + pair.key);
+            });
         }
     });
 }

@@ -17,13 +17,19 @@ export class ScriptStorage extends FileStorage {
         return singleInstance;
     }
 
-    GetEx(filePath) {
+    GetEx(path) {
         return new Promise((resolve, reject) => {
-            super.Get(filePath).then(result => {
+            super.Get(path).then(result => {
                 if (result == null) {
                     resolve(result);
                 } else {
-                    resolve(this.#ParseFileDetail(result.path, result.content));
+                    let details = [];
+
+                    result.forEach(file => {
+                        details.push(this.#ParseFileDetail(file.path, file.content))
+                    });
+
+                    resolve(details);
                 }
             });
         })

@@ -94,8 +94,8 @@ function Case_0() {
 
             _scriptStorage.Get(filePath).then((result) => {
 
-                if (_base.AssertExact(Case_0, result.path, filePath) &&
-                    _base.AssertExact(Case_0, result.content, fileContent)) {
+                if (_base.AssertExact(Case_0, result[0].path, filePath) &&
+                    _base.AssertExact(Case_0, result[0].content, fileContent)) {
                     resolve(_base.OK(Case_0));
                 } else {
                     resolve(_base.NG(Case_0));
@@ -128,8 +128,8 @@ function Case_1() {
 
             _scriptStorage.GetEx(expectedFileBasic.path).then(fileDetail => {
                 
-                if (_base.AssertObjectEqual(Case_1, fileDetail, expectedFileBasic) &&
-                    _base.AssertObjectEqual(Case_1, fileDetail.config, expectedConfig)) {
+                if (_base.AssertObjectEqual(Case_1, fileDetail[0], expectedFileBasic) &&
+                    _base.AssertObjectEqual(Case_1, fileDetail[0].config, expectedConfig)) {
                     resolve(_base.OK(Case_1));
                 } else {
                     resolve(_base.NG(Case_1));

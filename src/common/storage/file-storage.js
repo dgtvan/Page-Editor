@@ -23,7 +23,13 @@ export class FileStorage extends Storage {
                 if (result == null) {
                     resolve(result);
                 } else {
-                    resolve(this.#Resolver(result));
+                    let files = [];
+
+                    result.forEach(pair => {
+                        files.push(this.#Resolver(pair))
+                    });
+
+                    resolve(files);
                 }
             });
         });
