@@ -85,7 +85,7 @@ function PostTest() {
 }
 
 function Case_0() {
-    let filePath = FileNameHelper.Create('/a/b/c/d.js');
+    let filePath = FileNameHelper.Create('script/case_0.js');
     let fileContent = _plainFileContent;
 
     let executePromise = new Promise((resolve, reject) => {
@@ -110,8 +110,8 @@ function Case_0() {
 
 function Case_1() {
     let expectedFileBasic = {
-        path: FileNameHelper.Create('test-file-storage-case-1.js'),
-        name: 'test-file-storage-case-1',
+        path: FileNameHelper.Create('script/case_1.js'),
+        name: 'case_1',
         extension: '.js',
         content: _plainFileContent
     }
@@ -144,7 +144,7 @@ function Case_1() {
 }
 
 function Case_2() {
-    let filePath = FileNameHelper.Create('test-file-2.js');
+    let filePath = FileNameHelper.Create('script/case_2.js');
     let fileContent = _plainFileContent;
 
     let executePromise = new Promise((resolve, reject) => {
