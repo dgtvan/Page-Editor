@@ -27,12 +27,50 @@ function storage() {
 }
 
 function scriptStorage() {
-    _scriptStorage.AddSetListener((filePath, fileContent) => {
-        //_log.Info('Add. Path \'' + filePath + '\'. Content \'' + fileContent + '\'');
+    let onScriptChange = function(e) {
+        chrome.tabs.query({ active: true}, tabs => {
+            let isMatch = false;
+            let activeUrls = [];
+
+            tabs.forEach(tab => {
+                activeUrls.push(tab.url);
+
+                if (e.detail.config.urls.includes('all')) {
+                    _log.Info('Script change. Reload tab \'' + tab.id + '\'');
+                    chrome.tabs.reload(tab.id);
+                    isMatch = true;
+                } else {
+                    if (Utility.URLMatch(e.detail.config.urls, tab.url)) {
+                        _log.Info('Script change. Reload tab \'' + tab.id + '\'');
+                        chrome.tabs.reload(tab.id);
+                        isMatch = true;
+                    }
+                }
+            });
+
+            if (!isMatch) {
+                _log.Info('Script change. The active tab\' url does not match the script\'s url. Active tab urls \'' +  activeUrls.join() + '\'. Script urls \'' + e.detail.config.urls.join() + '\'');
+            }
+        });
+    };
+
+    _scriptStorage.AddEventListener('add', (e) => {
+        //_log.Info('Add. Path \'' + e.path + '\'. Content \'' + JSON.stringify(e.detail) + '\'');
+        onScriptChange(e);
     });
 
-    _scriptStorage.AddRemoveListener((filePath, fileContent) => {
-        //_log.Info('Remove. Path \'' + filePath + '\'. Content \'' + fileContent + '\'');
-        //_log.Info('Remove. Path \'' + filePath + '\'');
+    _scriptStorage.AddEventListener('modify', (e) => {
+        //_log.Info('Modify. Path \'' + e.path + '\'. Content \'' + JSON.stringify(e.detail) + '\'');
+        onScriptChange(e);
+    });
+
+    _scriptStorage.AddEventListener('delete', (e) => {
+        //_log.Info('Delete. Path \'' + e.path + '\'. Content \'' + JSON.stringify(e.detail) + '\'');
+        onScriptChange(e);
+    });
+
+    _scriptStorage.AddEventListener('rename', (e) => {
+        //_log.Info('Rename. Old path \'' + e.oldPath + '\'. New path \'' + e.newPath + '\'');
+        onScriptChange(e);
     });
 }

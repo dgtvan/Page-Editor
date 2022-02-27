@@ -1,6 +1,13 @@
 export function URLMatch(urlCollection, targetUrl) {
+    let site1 = '';
+    let site2 = '';
+    let site3 = '';
+    let site4 = '';
+
+    let urls = urlCollection;
+
     // Complete incomplete urls
-    for (let site of urlCollection) {
+    for (let site of urls) {
         if (!(site.startsWith("https://") || site.startsWith("http://")) && site.toLowerCase() != "all") {
             if (site.startsWith("www.")) {
                 site1 = "https://" + site;
@@ -13,14 +20,19 @@ export function URLMatch(urlCollection, targetUrl) {
                 site3 = "https://" + site;
                 site4 = "http://" + site;
             }
-            urlCollection.push(site1);
-            urlCollection.push(site2);
-            urlCollection.push(site3);
-            urlCollection.push(site4);
+            urls.push(site1);
+            urls.push(site2);
+            urls.push(site3);
+            urls.push(site4);
+
+            urls.push(site1 + "/");
+            urls.push(site2 + "/");
+            urls.push(site3 + "/");
+            urls.push(site4 + "/");
         }
     }
 
-    for (let url of urlCollection) {
+    for (let url of urls) {
         if (url.endsWith("*")) {
             // Recursive mode
             if (targetUrl.startsWith(url))
@@ -99,3 +111,44 @@ export function FunctionName(func)
 
     return  result  ?  result[ 1 ]  :  '' // for an anonymous function there won't be a match
 }
+
+// https://gomakethings.com/vanilla-javascript-version-of-jquery-extend/#a-native-js-extend-function
+// Pass in the objects to merge as arguments.
+// For a deep extend, set the first argument to `true`.
+export function Extend() {
+
+	// Variables
+	var extended = {};
+	var deep = false;
+	var i = 0;
+	var length = arguments.length;
+
+	// Check if a deep merge
+	if ( Object.prototype.toString.call( arguments[0] ) === '[object Boolean]' ) {
+		deep = arguments[0];
+		i++;
+	}
+
+	// Merge the object into the extended object
+	var merge = function (obj) {
+		for ( var prop in obj ) {
+			if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
+				// If deep merge and property is an object, merge properties
+				if ( deep && Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
+					extended[prop] = extend( true, extended[prop], obj[prop] );
+				} else {
+					extended[prop] = obj[prop];
+				}
+			}
+		}
+	};
+
+	// Loop through each object and conduct a merge
+	for ( ; i < length; i++ ) {
+		var obj = arguments[i];
+		merge(obj);
+	}
+
+	return extended;
+
+};

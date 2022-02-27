@@ -17,7 +17,7 @@ export class ScriptStorage extends FileStorage {
         return singleInstance;
     }
 
-    GetEx(path) {
+    Get(path) {
         return new Promise((resolve, reject) => {
             super.Get(path).then(result => {
                 if (result == null) {
@@ -33,6 +33,25 @@ export class ScriptStorage extends FileStorage {
                 }
             });
         })
+    }
+
+    AddEventListener(event, handler) {
+        let self = this;
+
+        let generalEventHandler = function(e) {
+
+            if (event == 'rename') {
+                handler(e);
+            } else {
+                let detail = self.#ParseFileDetail(e.path, e.content);
+                handler({
+                    path: e.path,
+                    detail: detail
+                });
+            }
+        }
+
+        super.AddEventListener(event, generalEventHandler);
     }
 
     #ParseFileDetail(filePath, fileContentRaw) {
@@ -82,7 +101,8 @@ export class ScriptStorage extends FileStorage {
         //
         // Config
         //
-        fileDetail.config = this.#ExtractConfig(fileContent);
+        let config = this.#ExtractConfig(fileContent);
+        fileDetail.config = Utility.Extend(true, fileDetail.config, config); 
 
         return fileDetail;
     }
@@ -142,7 +162,7 @@ export class ScriptStorage extends FileStorage {
 
                         return true;
                     });
-
+                    
                     config.urls = configUrls;
                 }
 

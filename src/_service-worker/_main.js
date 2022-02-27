@@ -30,7 +30,7 @@ NativeMessage.Intialize();
  * RUN TEST
  */
 
-Test.Begin();
+//Test.Begin();
 
 
 

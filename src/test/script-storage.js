@@ -11,7 +11,7 @@ const _base = new Base(_log, PreTest, PostTest);
 
 //#region Test Data
 const _seedFileContent =
-    `
+`
 // Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
 
 /* 
@@ -90,7 +90,7 @@ function Case_0() {
 
     let executePromise = new Promise((resolve, reject) => {
 
-        _scriptStorage.Set(filePath, fileContent).then(() => {
+        _scriptStorage.Add(filePath, fileContent).then(() => {
 
             _scriptStorage.Get(filePath).then((result) => {
 
@@ -124,9 +124,9 @@ function Case_1() {
 
     let executePromise = new Promise((resolve, reject) => {
 
-        _scriptStorage.Set(expectedFileBasic.path, _plainFileContent).then(() =>{
+        _scriptStorage.Add(expectedFileBasic.path, _plainFileContent).then(() =>{
 
-            _scriptStorage.GetEx(expectedFileBasic.path).then(fileDetail => {
+            _scriptStorage.Get(expectedFileBasic.path).then(fileDetail => {
                 
                 if (_base.AssertObjectEqual(Case_1, fileDetail[0], expectedFileBasic) &&
                     _base.AssertObjectEqual(Case_1, fileDetail[0].config, expectedConfig)) {
@@ -149,9 +149,9 @@ function Case_2() {
 
     let executePromise = new Promise((resolve, reject) => {
 
-        _scriptStorage.Set(filePath, fileContent).then(() => {
+        _scriptStorage.Add(filePath, fileContent).then(() => {
 
-            _scriptStorage.Remove(filePath).then(() => {
+            _scriptStorage.Delete(filePath).then(() => {
 
                 _scriptStorage.Get(filePath).then(result => {
                     if (result == null)

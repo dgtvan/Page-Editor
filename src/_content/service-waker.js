@@ -6,7 +6,7 @@ function InitializeServiceWaker() {
             message: 'wakeup_service_worker'
         });
         _log.Info('Message wakeup_service_worker sent', true);        
-    }, 1000);
+    }, 250);
 
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {

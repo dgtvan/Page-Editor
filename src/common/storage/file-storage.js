@@ -7,6 +7,11 @@ import { Storage } from './_storage.js';
 let singleInstance = null;
 
 export class FileStorage extends Storage {
+    #_addEventListeners = [];
+    #_modifyEventListeners = [];
+    #_deleteEventListeners = [];
+    #_renameEventListeners = [];
+
     constructor(partition) {
         if (singleInstance == null) {
             super('_FILE_' + partition);
@@ -17,9 +22,76 @@ export class FileStorage extends Storage {
         return singleInstance;
     }
 
-    Get(filePath) {
+    Add(path, content) {
+        let self = this;
         return new Promise((resolve, reject) => {
-            super.Get(filePath).then(result => {
+            super.Set(path, content).then(result => {
+                let ret = self.#Resolver(result);
+
+                self.#_addEventListeners.forEach(async (handler) => {
+                    handler?.(ret);
+                });
+
+                resolve(ret);
+            });
+        });
+    }
+
+    Modify(path, content) {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            super.Remove(path).then(() => {
+                super.Set(path, content).then(result => {
+                    let ret = self.#Resolver(result);
+
+                    self.#_modifyEventListeners.forEach(async (handler) => {
+                        handler?.(ret);
+                    });
+
+                    resolve(ret);
+                });
+            });
+        });
+    }
+
+    Delete(path) {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            super.Remove(path).then(result =>{
+                let ret = self.#Resolver(result);
+
+                self.#_deleteEventListeners.forEach(async (handler) => {
+                    handler?.(ret);
+                });
+
+                resolve(ret);
+            });
+        })
+    }
+
+    Rename(oldPath, newPath) {
+        let self = this;
+        return new Promise((resolve, reject) => {
+            super.Remove(oldPath).then(result =>{
+                super.Set(newPath, result.value).then(result => {
+                    let ret ={
+                        oldPath: oldPath,
+                        newPath: newPath
+                    }
+
+                    self.#_renameEventListeners.forEach(async (handler) => {
+                        handler?.(ret);
+                    });
+
+                    resolve(ret);
+                });
+            });
+        });
+    }
+
+    Get(path) {
+        return new Promise((resolve, reject) => {
+            super.Get(path).then(result => {
                 if (result == null) {
                     resolve(result);
                 } else {
@@ -35,20 +107,24 @@ export class FileStorage extends Storage {
         });
     }
 
-    Set(filePath, fileContent) {
-        return new Promise((resolve, reject) => {
-            super.Set(filePath, fileContent).then(result => {
-                resolve(this.#Resolver(result));
-            });
-        })
-    }
+    AddEventListener(event, handler) {
+        switch(event) {
+            case 'add':
+                this.#_addEventListeners.push(handler);
+                break;
 
-    Remove(filePath) {
-        return new Promise((resolve, reject) => {
-            super.Remove(filePath).then(result => {
-                resolve(this.#Resolver(result));
-            })
-        });
+            case 'modify':
+                this.#_modifyEventListeners.push(handler);
+                break;
+
+            case 'delete':
+                this.#_deleteEventListeners.push(handler);
+                break;
+
+            case 'rename':
+                this.#_renameEventListeners.push(handler);
+                break;
+        }
     }
 
     #Resolver(result) {
@@ -56,5 +132,33 @@ export class FileStorage extends Storage {
             path: result.key,
             content: result.value
         }
+    }
+
+    /**
+     * @deprecated No support
+     */
+    Set(path, content) {
+        throw 'No support';
+    }
+
+    /**
+     * @deprecated No support
+     */
+    Remove(path) {
+        throw 'No support';
+    }
+
+    /**
+     * @deprecated No support
+     */
+    AddSetListener(handler) {
+        throw 'No support';
+    }
+
+    /**
+     * @deprecated No support
+     */
+    AddRemoveListener(handler) {
+        throw 'No support';
     }
 }

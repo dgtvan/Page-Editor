@@ -55,7 +55,7 @@ function CheckInjectableTabs() {
 
         tabs.forEach(tab => {
             let promise = new Promise((resolve, reject) => {
-                _log.Info('Send content_script_injectable to tab \'' + tab.id + '\'');
+                _log.Info('Send content_script_injectable to tab \'' + tab.id + '\'', true);
 
                 chrome.tabs.sendMessage(tab.id, {
                     message: 'content_script_injectable'
@@ -66,7 +66,7 @@ function CheckInjectableTabs() {
 
                         isInjecteable = response
                     }
-                    _log.Info('Resp content_script_injectable from tab ' + tab.id + '. Response: ' + isInjecteable);
+                    _log.Info('Resp content_script_injectable from tab ' + tab.id + '. Response: ' + isInjecteable, true);
                     resolve(isInjecteable);
                 });
             });
