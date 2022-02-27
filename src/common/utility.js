@@ -4,7 +4,7 @@ export function URLMatch(urlCollection, targetUrl) {
     let site3 = '';
     let site4 = '';
 
-    let urls = urlCollection;
+    let urls = urlCollection.slice();
 
     // Complete incomplete urls
     for (let site of urls) {

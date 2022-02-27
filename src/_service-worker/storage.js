@@ -10,7 +10,8 @@ const _scriptStorage = new ScriptStorage();
 
 export function Initialize() {
     storage();
-    scriptStorage();
+    scriptStorageChangeListener();
+    scriptStorageBridger();
     _log.Info('Initialization completed.');
 }
 
@@ -26,7 +27,7 @@ function storage() {
     });
 }
 
-function scriptStorage() {
+function scriptStorageChangeListener() {
     let onScriptChange = function(e) {
         chrome.tabs.query({ active: true}, tabs => {
             let activeUrls = [];
@@ -35,7 +36,7 @@ function scriptStorage() {
             tabs.forEach(tab => {
                 activeUrls.push(tab.url);
 
-                if (e.detail.config.urls.includes('all') || Utility.URLMatch(e.detail.config.urls, tab.url)) {
+                if (MatchUrl(e.detail.config.urls, tab.url)) {
                     matchedTabs.push(tab);
                 }
             });
@@ -69,4 +70,36 @@ function scriptStorage() {
         //_log.Info('Rename. Old path \'' + e.oldPath + '\'. New path \'' + e.newPath + '\'');
         onScriptChange(e);
     });
+}
+
+function scriptStorageBridger() {
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+            if (request.message === "content_script_fetches_all_scripts") {
+                _log.Info('Recv content_script_fetches_all_scripts');
+
+                let matchFiles = [];
+                let targetUrl = request.content.url;
+
+                _scriptStorage.Get(null).then(files => {
+                    if (files == null) {
+                        _log.Info('No script available');
+                    } else {
+                        files.forEach(file => {
+                            if (MatchUrl(file.config.urls, targetUrl)) {
+                                _log.Info('Match script \'' + file.path + '\'');
+                                matchFiles.push(file);
+                            }
+                        });
+                    }
+
+                    sendResponse(matchFiles);
+                });
+            }
+        }
+    );
+}
+
+function MatchUrl(scriptUrls, targetUrl) {
+    return scriptUrls.includes('all') || Utility.URLMatch(scriptUrls, targetUrl)
 }
