@@ -29,27 +29,23 @@ function storage() {
 function scriptStorage() {
     let onScriptChange = function(e) {
         chrome.tabs.query({ active: true}, tabs => {
-            let isMatch = false;
             let activeUrls = [];
+            let matchedTabs = [];
 
             tabs.forEach(tab => {
                 activeUrls.push(tab.url);
 
-                if (e.detail.config.urls.includes('all')) {
-                    _log.Info('Script change. Reload tab \'' + tab.id + '\'');
-                    chrome.tabs.reload(tab.id);
-                    isMatch = true;
-                } else {
-                    if (Utility.URLMatch(e.detail.config.urls, tab.url)) {
-                        _log.Info('Script change. Reload tab \'' + tab.id + '\'');
-                        chrome.tabs.reload(tab.id);
-                        isMatch = true;
-                    }
+                if (e.detail.config.urls.includes('all') || Utility.URLMatch(e.detail.config.urls, tab.url)) {
+                    matchedTabs.push(tab);
                 }
             });
 
-            if (!isMatch) {
-                _log.Info('Script change. The active tab\' url does not match the script\'s url. Active tab urls \'' +  activeUrls.join() + '\'. Script urls \'' + e.detail.config.urls.join() + '\'');
+            if (matchedTabs.length > 0) {
+                matchedTabs.forEach(async (tab) => {
+                    chrome.tabs.reload(tab.id);
+                });
+            } else {
+                _log.Info('Script change \'' + e.path + '\'. The active tab\' url does not match the script\'s url. Active tab urls \'' +  activeUrls.join() + '\'. Script urls \'' + e.detail.config.urls.join() + '\'');
             }
         });
     };
