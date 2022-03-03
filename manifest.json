@@ -42,6 +42,6 @@
         "<all_urls>"
     ],
     "content_security_policy": {
-        "extension_pages": "default-src 'none'; script-src-elem http://localhost; script-src http://localhost; object-src http://localhost"
-      }
+        
+    }
 }
