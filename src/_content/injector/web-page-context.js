@@ -1,0 +1,14 @@
+document.addEventListener("send_pge_scripts", function(e) {
+    var scripts = e.detail.scripts;
+
+    scripts.forEach(script => {
+        let scriptTag = document.createElement('script');
+        scriptTag.type = 'text/javascript';
+        scriptTag.async = true;
+        scriptTag.innerHTML = script.content    
+        document.head.appendChild(scriptTag);
+    });
+});
+
+let _event_ = new CustomEvent("get_pge_scripts", {});
+document.dispatchEvent(_event_);

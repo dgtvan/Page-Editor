@@ -1,8 +1,44 @@
 function ExecuteInjector() {
     const _log = new Log('ContentScript-Injector');
 
-    _log.Info('Start injector');
+    _log.Info('Injecting...');
 
+    // Does not work due to Content security policy.
+    //Injection_V2();
+
+    Injection_V1();
+}
+
+function Injection_V1()
+{
+    document.addEventListener("get_pge_scripts", function(e) {
+        GetScriptFiles().then(files => {
+            if (files == null) {
+                _log.Info('No script available');
+            } else {
+                var endScriptEvent = new CustomEvent("send_pge_scripts", {
+                    detail: {
+                        scripts: files
+                    }
+                });
+                document.dispatchEvent(endScriptEvent);
+            }
+        });
+    });
+
+    //
+    // Begin injection
+    //
+    var s = document.createElement('script');
+    s.src = chrome.runtime.getURL('src/_content/injector/web-page-context.js');
+    // s.onload = function() {
+    //     this.remove();
+    // };
+    (document.head || document.documentElement).appendChild(s);
+}
+
+function Injection_V2()
+{
     document.addEventListener('DOMContentLoaded', (event) => {
         _log.Info('DOMContentLoaded');
 

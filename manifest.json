@@ -9,6 +9,12 @@
     "action": {
 
     },
+    "web_accessible_resources": [{
+        "resources": [
+            "src/_content/injector/web-page-context.js"
+        ],
+        "matches": ["<all_urls>"]
+    }],
     "background": {
         "service_worker": "src/_service-worker/_main.js",
         "type": "module"
@@ -19,7 +25,7 @@
         "js": [
             "src/common/log/log.js",
             "src/_content/service-waker.js",
-            "src/_content/injector.js",
+            "src/_content/injector/injector.js",
             "src/_content/_main.js"
         ],
         "match_about_blank": true
