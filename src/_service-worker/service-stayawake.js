@@ -1,4 +1,5 @@
 import { Log } from '../common/log/es-log.js';
+import * as NativeMessage from '../common/native-message.js';
 
 const _log = new Log('SW-Awake');
 
@@ -26,6 +27,12 @@ export function Intialize() {
                 //          _log.Info('Rtr last wakeup time \'' + lastWakeupTime.toLocaleTimeString() + '\'');
                 //     }
                 // })
+
+                if (NativeMessage.IsConnected()) {
+                    chrome.action.setBadgeText({ text: 'E' })
+                } else {
+                    chrome.action.setBadgeText({ text: '' })
+                }
             }
             return true;
         }

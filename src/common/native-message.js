@@ -32,6 +32,15 @@ export function Initialize()
     });
 }
 
+export function IsConnected() {
+    let sk = _socket?.connected;
+    if (sk == null || typeof(sk) == 'undefined') {
+        return false
+    } else {
+        return sk;
+    }
+}
+
 export function Send(message, messageContent, responseCallback)
 {
     _socket.emit(message, messageContent, (responseContent) => 
