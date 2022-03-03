@@ -1,8 +1,7 @@
+const _injectorLog = new Log('ContentScript-Injector');
+
+
 function ExecuteInjector() {
-    const _log = new Log('ContentScript-Injector');
-
-    _log.Info('Injecting...');
-
     // Does not work due to Content security policy.
     //Injection_V2();
 
@@ -12,10 +11,14 @@ function ExecuteInjector() {
 function Injection_V1()
 {
     document.addEventListener("get_pge_scripts", function(e) {
+        _injectorLog.Info('Receive query scripts from Web Page');
+
         GetScriptFiles().then(files => {
             if (files == null) {
-                _log.Info('No script available');
+                _injectorLog.Info('No script available');
             } else {
+                _injectorLog.Info('Matched ' + files.length + ' scripts');
+                _injectorLog.Info('Send scripts to Web Page');
                 var endScriptEvent = new CustomEvent("send_pge_scripts", {
                     detail: {
                         scripts: files
@@ -65,7 +68,7 @@ function Injection_V2()
 
 function GetScriptFiles() {
     return new Promise((resolve, reject) => {
-        _log.Info("Send content_script_fetches_all_scripts");
+        _log.Info("Send query scripts to Service worker");
 
         chrome.runtime.sendMessage({
             message: 'content_script_fetches_all_scripts',
@@ -73,8 +76,7 @@ function GetScriptFiles() {
                 url: window.location.href
             }
         }, function (response) {
-            _log.Info("Recv content_script_fetches_all_scripts");
-
+            _log.Info("Receive scripts from Service worker");
             resolve(response);
         });
     });

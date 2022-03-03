@@ -22,6 +22,18 @@ export class FileStorage extends Storage {
         return singleInstance;
     }
 
+    Contain(path) {
+        return new Promise((resolve, reject) => {
+            super.Get(path).then(result => {
+                if (result == null) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
     Add(path, content) {
         let self = this;
         return new Promise((resolve, reject) => {

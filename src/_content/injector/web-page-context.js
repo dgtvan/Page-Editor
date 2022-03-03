@@ -1,6 +1,8 @@
 document.addEventListener("send_pge_scripts", function(e) {
     var scripts = e.detail.scripts;
 
+    console.log('Received scripts from Content Script');
+
     scripts.forEach(script => {
         let scriptTag = document.createElement('script');
         scriptTag.type = 'text/javascript';
@@ -12,3 +14,4 @@ document.addEventListener("send_pge_scripts", function(e) {
 
 let _event_ = new CustomEvent("get_pge_scripts", {});
 document.dispatchEvent(_event_);
+console.log('Query scripts from Content Script');

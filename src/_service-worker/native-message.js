@@ -28,7 +28,13 @@ export function Intialize() {
                 break;
 
             case 'modify':
-                _scriptStorage.Modify(msg.oldFile.path, Utility.Base64Decode(msg.oldFile.content));
+                _scriptStorage.Contain(msg.oldFile.path).then(exist => {
+                    if (exist) {
+                        _scriptStorage.Modify(msg.oldFile.path, Utility.Base64Decode(msg.oldFile.content));
+                    } else {
+                        _scriptStorage.Add(msg.oldFile.path, Utility.Base64Decode(msg.oldFile.content));
+                    }
+                });
                 break;
 
             case 'rename':

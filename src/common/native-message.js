@@ -49,9 +49,9 @@ export function AddMessageListener(message, messageContentCallback)
 
         let contentJson = JSON.stringify(messageContent);
         let peakContent = '';
-        if (contentJson.length > 20)
+        if (contentJson.length > 100)
         {
-            peakContent = contentJson.substring(0, 20) + '...';
+            peakContent = contentJson.substring(0, 100) + '...';
         } else {
             peakContent = contentJson;
         }
