@@ -24,7 +24,9 @@ export function URLMatch(urlCollection, targetUrl) {
             urls.push(site2);
             urls.push(site3);
             urls.push(site4);
+        }
 
+        if(!site.endsWith('*') && !site.endsWith('/')) {
             urls.push(site1 + "/");
             urls.push(site2 + "/");
             urls.push(site3 + "/");
@@ -34,8 +36,9 @@ export function URLMatch(urlCollection, targetUrl) {
 
     for (let url of urls) {
         if (url.endsWith("*")) {
+            let noasterisk = url.substring(0, url.length-1);
             // Recursive mode
-            if (targetUrl.startsWith(url))
+            if (targetUrl.startsWith(noasterisk))
             {
                 return true;
             }
