@@ -1,7 +1,7 @@
 var PGE=PGE || {};
 
 PGE.HttpRequest = class {
-    static #window = null;
+    static #document = null;
     static #ajaxDict = {};
 
     static #GetAvailableTag = function(handler) {
@@ -16,12 +16,12 @@ PGE.HttpRequest = class {
         }
     }
 
-    static Intialize = function(window) {
+    static Initialize = function(document) {
         let self = PGE.HttpRequest;
 
-        self.#window = window;
+        self.#document = document;
 
-        self.#window.addEventListener("http_request_bridge_response", function(e) {
+        self.#document.addEventListener("http_request_bridge_response", function(e) {
             if (self.#ajaxDict.hasOwnProperty(e.detail.tag)) {
                 var handler = self.#ajaxDict[e.detail.tag];
                 handler?.(e.detail.response);
@@ -43,7 +43,9 @@ PGE.HttpRequest = class {
                     tag: tag
                 }
             });
-            self.#window.dispatchEvent(event);
+            self.#document.dispatchEvent(event);
         });
     }
 }
+
+PGE.HttpRequest.Initialize(document);
