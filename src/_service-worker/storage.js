@@ -36,7 +36,7 @@ function scriptStorageChangeListener() {
             tabs.forEach(tab => {
                 activeUrls.push(tab.url);
 
-                if (MatchUrl(e.detail.config.urls, tab.url)) {
+                if (MatchUrl(e.config.urls, tab.url)) {
                     matchedTabs.push(tab);
                 }
             });
@@ -46,28 +46,33 @@ function scriptStorageChangeListener() {
                     chrome.tabs.reload(tab.id);
                 });
             } else {
-                _log.Info('Script change \'' + e.path + '\'. The active tab\' url does not match the script\'s url. Active tab urls \'' +  activeUrls.join() + '\'. Script urls \'' + e.detail.config.urls.join() + '\'');
+                _log.Info('Script change \'' + e.path + '\'. The active tab\' url does not match the script\'s url. Active tab urls \'' +  activeUrls.join() + '\'. Script urls \'' + e.config.urls.join() + '\'');
             }
         });
     };
 
     _scriptStorage.AddEventListener('add', (e) => {
         //_log.Info('Add. Path \'' + e.path + '\'. Content \'' + JSON.stringify(e.detail) + '\'');
+        DumpEvent('add', e);
         onScriptChange(e);
     });
 
     _scriptStorage.AddEventListener('modify', (e) => {
         //_log.Info('Modify. Path \'' + e.path + '\'. Content \'' + JSON.stringify(e.detail) + '\'');
+        DumpEvent('modify', e);
         onScriptChange(e);
     });
 
     _scriptStorage.AddEventListener('delete', (e) => {
         //_log.Info('Delete. Path \'' + e.path + '\'. Content \'' + JSON.stringify(e.detail) + '\'');
-        onScriptChange(e);
+        DumpEvent('delete', e);
+        // It seems to be redundant to take any action on deletion events.
+        //onScriptChange(e); 
     });
 
     _scriptStorage.AddEventListener('rename', (e) => {
         //_log.Info('Rename. Old path \'' + e.oldPath + '\'. New path \'' + e.newPath + '\'');
+        DumpEvent('rename', e);
         onScriptChange(e);
     });
 }
@@ -102,4 +107,12 @@ function scriptStorageBridger() {
 
 function MatchUrl(scriptUrls, targetUrl) {
     return scriptUrls.includes('all') || Utility.URLMatch(scriptUrls, targetUrl)
+}
+
+function DumpEvent(action, e) {
+    if (action == 'rename') {
+        _log.Info('Action: ' + action + '. Old path \'' + e.oldPath + '\'. New path \'' + e.newPath + '\'');
+    } else {
+        _log.Info('Action: ' + action + '. Path \'' + e.path + '\'');
+    }
 }

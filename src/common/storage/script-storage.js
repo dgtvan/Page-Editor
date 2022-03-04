@@ -44,10 +44,7 @@ export class ScriptStorage extends FileStorage {
                 handler(e);
             } else {
                 let detail = self.#ParseFileDetail(e.path, e.content);
-                handler({
-                    path: e.path,
-                    detail: detail
-                });
+                handler(detail);
             }
         }
 

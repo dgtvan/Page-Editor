@@ -10,11 +10,7 @@ export function Intialize() {
 
     NativeMessage.Initialize();
 
-    NativeMessage.AddMessageListener("Ping", messageContent => {
-        return 'Pong ' + messageContent;
-    });
-
-    NativeMessage.AddMessageListener("ExternalFileChange", msg => {
+    NativeMessage.AddMessageListener("ExternalFileChange", (msg, responseCallback) => {
 
         // _log.Info('Handler Recv ExternalFileChange. ');
         // if (msg.action == 'modify') {
@@ -50,8 +46,28 @@ export function Intialize() {
                 break;
         }
 
-        return true;
+        responseCallback(true);
     });
 
+    NativeMessage.AddMessageListener('SynchronizeFile', (files, responseCallback) => {
+        _log.Info('Recv SynchronizeFile from PageEditor-VSCode')
+
+        _scriptStorage.Delete(null).then(() => {
+            return Promise.resolve();
+        }).then(() =>{
+            if (files.length == 0) {
+                return Promise.resolve();
+            } else {
+                return Promise.allSettled(files.map(file => {
+                    return _scriptStorage.Add(file.path, Utility.Base64Decode(file.content));
+                }));
+            }
+        }).then(() => {
+            responseCallback(true);
+            return Promise.resolve();
+        }).then(() => {
+            _log.Info('Synchronization completed');
+        });
+    });
     _log.Info('Initialization completed.');
 }

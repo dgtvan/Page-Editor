@@ -52,7 +52,7 @@ export function Send(message, messageContent, responseCallback)
     _log.Info('Send Message \'' + message + '\'. Content \'' + messageContent + '\'.');
 }
 
-export function AddMessageListener(message, messageContentCallback)
+export function AddMessageListener(message, handler)
 {   
     _socket.on(message, (messageContent, responseCallback) => {
 
@@ -67,23 +67,27 @@ export function AddMessageListener(message, messageContentCallback)
 
         _log.Info('Recv Message \'' + message + '\'. Peak content \'' + peakContent + '\'.');
 
-        let responseContent = messageContentCallback?.(messageContent);
+        if (handler == null) {
+            responseCallback(null);
+        } else {
+            let bridger = function(response) {
+                if (response == null ||
+                    typeof(response) == 'undefined')
+                {
+                    _log.Info('Resp Message \'' + message + '\'. Response \'<Empty>\'.');
+                }
+                else
+                {
+                    _log.Info('Resp Message \'' + message + '\'. Response \'' + response + '\'.');
+                }
 
-        if (messageContentCallback != null) {
-            if (responseContent == null)
-            {
-                _log.Info('Resp Message \'' + message + '\'. Response \'<Empty>\'.');
-            }
-            else
-            {
-                _log.Info('Resp Message \'' + message + '\'. Response \'' + responseContent + '\'.');
+                responseCallback(response);
             }
 
-            responseCallback(responseContent);
+            handler?.(messageContent, bridger);
         }
 
     });
-
 }
 
 export function OnConnectionStateChanged(stateChangeCallback)

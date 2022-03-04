@@ -80,22 +80,40 @@ export class Storage {
 
         return new Promise((resolve, reject) => {
             chrome.storage.local.get(partitionedKey, (data) => {
+                
+                let pairs = [];
+
                 for (const [keyResult, valueResult] of Object.entries(data)) {
                     if (keyResult.startsWith(partition)) {
                         let keyWithoutPartition = keyResult.substring(partition.length);
 
                         chrome.storage.local.remove(keyResult, () => {
-                            refRemoveEventHandler.forEach(async (handler) => {
-                                handler?.(keyWithoutPartition, valueResult);
-                            })
-
-                            resolve({
+                            
+                            pairs.push({
                                 key: keyWithoutPartition,
                                 value: valueResult
                             });
+
                         });
 
                     }
+                }
+
+                pairs.forEach(pair => {
+                    refRemoveEventHandler.forEach(async (handler) => {
+                        handler?.(pair.key, pair.value);
+                    })
+                });
+
+                if (pairs.length == 1) {
+                    resolve({
+                        key: pairs[0].key,
+                        value: pairs[0].value
+                    });
+                } else if (pairs.length > 1) {
+                    resolve(pairs);
+                } else {
+                    resolve(null);
                 }
             });
         })

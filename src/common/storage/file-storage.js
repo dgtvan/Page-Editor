@@ -70,13 +70,32 @@ export class FileStorage extends Storage {
         let self = this;
         return new Promise((resolve, reject) => {
             super.Remove(path).then(result =>{
-                let ret = self.#Resolver(result);
 
-                self.#_deleteEventListeners.forEach(async (handler) => {
-                    handler?.(ret);
-                });
+                if (result == null) {
+                    resolve(result);
+                } else if (Array.isArray(result)) {
+                    let files = [];
 
-                resolve(ret);
+                    result.forEach(pair => {
+                        let file = self.#Resolver(pair);
+                        files.push(file);
+
+                        self.#_deleteEventListeners.forEach(async (handler) => {
+                            handler?.(file);
+                        });
+                    });
+
+                    resolve(files);
+                } else {
+                    let ret = self.#Resolver(result);
+
+                    self.#_deleteEventListeners.forEach(async (handler) => {
+                        handler?.(ret);
+                    });
+    
+                    resolve(ret);
+                }
+
             });
         })
     }
@@ -86,7 +105,7 @@ export class FileStorage extends Storage {
         return new Promise((resolve, reject) => {
             super.Remove(oldPath).then(result =>{
                 super.Set(newPath, result.value).then(result => {
-                    let ret ={
+                    let ret = {
                         oldPath: oldPath,
                         newPath: newPath
                     }
