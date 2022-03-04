@@ -40,6 +40,7 @@ function Injection_V1()
     let scripts = [
         'src/_content/web-resources/dom-element.js',
         'src/_content/web-resources/http-request.js',
+        'src/_content/web-resources/rotatable-video-control.js',
         'src/_content/web-resources/pge-scripts.js',
     ]
 

@@ -13,7 +13,8 @@
         "resources": [
             "src/_content/web-resources/pge-scripts.js",
             "src/_content/web-resources/http-request.js",
-            "src/_content/web-resources/dom-element.js"
+            "src/_content/web-resources/dom-element.js",
+            "src/_content/web-resources/rotatable-video-control.js"
         ],
         "matches": ["<all_urls>"]
     }],

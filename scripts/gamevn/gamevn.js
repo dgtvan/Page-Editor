@@ -1,3 +1,7 @@
+/*-Page-Editor-
+urls=gamevn.com/*
+-Page-Editor-*/
+
 /*
 Layout
 */
@@ -34,7 +38,9 @@ async function singlePageLayout()
     content.append(leftColumn);
     content.append(rightColumn);
     
-    PM.RemoveElementsBySelector('li.node div.nodeInfo div.nodeLastPost');
+    PGE.Element.Action('li.node div.nodeInfo div.nodeLastPost', e => {
+        e.remove();
+    });
     
     PM.RemoveElementsBySelector('ol.discussionListItems li div.posterAvatar');
     PM.RemoveElementsBySelector('ol.discussionListItems li div.lastPost');
@@ -72,7 +78,7 @@ const removalSelectors = [
 	
 ];
 
-PM.RemoveElementsBySelectors(removalSelectors);
+PGE.Element.Action(removalSelectors, e => e.remove());
 
 const styleSelectors = [
     {
@@ -147,7 +153,15 @@ const styleSelectors = [
 ];
 
 Promise.all(styleSelectors.map(async (styleSelector) => {
-	await PM.StyleElementsBySelector(styleSelector.selector, styleSelector.styles);
+	await PGE.Element.Action(styleSelector.selector, e => {
+        styleSelector.styles.forEach(style => {
+            if (style.hasOwnProperty('modifier')) {
+                e.style.setProperty(style.property, style.value, style.modifier);
+            } else {
+                e.style.setProperty(style.property, style.value);
+            }
+        })
+    });
 }));
 
 hideMudimPanel();
@@ -162,7 +176,7 @@ async function hideMudimPanel()
 /*
 Remove spoilers
 */
-PM.ActionElements("div.bbCodeSpoilerContainer", function(e) {
+PGE.Element.Action("div.bbCodeSpoilerContainer", function(e) {
     var spoilerTarget = e.getElementsByClassName("SpoilerTarget")[0]
 
     var newContent = document.createElement("div")
@@ -185,10 +199,10 @@ function createVideoTag(videoAddr)
     //videoTag.setAttribute('height', screen.height * 70 / 100);
     
     //<div class="v-video-container" video-src="videos/mikethefrog.mp4" video-height="204px"></div>
-    var videoTag = document.createElement('div');
+    var videoTag = document.createElement('video');
     videoTag.setAttribute('class', 'v-video-container');
-    videoTag.setAttribute('video-src', videoAddr);
-    videoTag.setAttribute('video-height', (screen.height * 70 / 100) +'px');
+    videoTag.setAttribute('src', videoAddr);
+    videoTag.setAttribute('height', (screen.height * 70 / 100) +'px');
     
     return videoTag;
 }
@@ -212,16 +226,43 @@ async function insertTiktokVideo() {
                 var config = {
                     type: 'GET',
                     url: href,
-                    data: {},
-                    timeout: 5000,
-                    dataType: 'html',
-                    success: function(d, status, xhr) {
-                        //console.log(xhr);
-                        console.log('Request to ' + href + ' => OK');
+                    // data: {},
+                    // timeout: 5000,
+                    // dataType: 'html',
+                    // success: function(d, status, xhr) {
+                    //     //console.log(xhr);
+                    //     console.log('Request to ' + href + ' => OK');
                         
-                        var parser = new DOMParser(); 
-                        var responseDoc = parser.parseFromString(d, "text/html");
+                    //     var parser = new DOMParser(); 
+                    //     var responseDoc = parser.parseFromString(d, "text/html");
     
+                    //     var persistedScript = responseDoc.getElementById('sigi-persisted-data');
+                    //     persistedScript = persistedScript.innerText.substring("window['SIGI_STATE']=".length);
+                    //     persistedScript = persistedScript.substring(0, persistedScript.indexOf("window['SIGI_RETRY']")-1);
+                        
+                    //     var scriptObject = JSON.parse(persistedScript);
+                        
+                    //     var videoId = scriptObject["ItemList"]["video"]["list"][0];
+                    //     var videoInfo = scriptObject["ItemModule"][videoId]["video"];
+                    //     var videoAddr = decodeURIComponent(videoInfo["playAddr"]);
+                        
+                    //     var videoTag = createVideoTag(videoAddr);
+                        
+                    //     externalLink.replaceWith(videoTag);
+                    // },
+                    // error: function(d) {
+                    //     externalLink.text = externalLink.text + '(Dead link)';
+                    // }
+                }
+                
+                PGE.HttpRequest.Send(config).then(response => {
+                    console.log('Request to ' + href + ' => OK');
+                    
+                    try
+                    {
+                        var parser = new DOMParser(); 
+                        var responseDoc = parser.parseFromString(response.responseText, "text/html");
+
                         var persistedScript = responseDoc.getElementById('sigi-persisted-data');
                         persistedScript = persistedScript.innerText.substring("window['SIGI_STATE']=".length);
                         persistedScript = persistedScript.substring(0, persistedScript.indexOf("window['SIGI_RETRY']")-1);
@@ -235,18 +276,20 @@ async function insertTiktokVideo() {
                         var videoTag = createVideoTag(videoAddr);
                         
                         externalLink.replaceWith(videoTag);
-                    },
-                    error: function(d) {
+                    }
+                    catch
+                    {
                         externalLink.text = externalLink.text + '(Dead link)';
                     }
-                }
-                
-                PM.CrossOriginHttpRequest(config);
+                });
             }
             else if ((
-                        (href.startsWith('https://www.facebook.com') ||
-                        href.startsWith('https://facebook.com'))
-                      && href.includes('/videos/')
+                        (href.startsWith('https://www.facebook.com') || 
+                         href.startsWith('https://facebook.com') ||
+                         href.startsWith('http://www.facebook.com') ||
+                         href.startsWith('http://facebook.com'))
+
+                        && href.includes('/videos/')
                     )
                     ||
                     (
@@ -262,65 +305,111 @@ async function insertTiktokVideo() {
                     mobileUrl = mobileUrl.replace('//facebook.com', '//m.facebook.com');
     
                     var config = {
-                        type: 'GET',
+                        //type: 'GET',
+                        credentials: 'include',
                         url: mobileUrl,
-                        data: {},
-                        timeout: 5000,
-                        dataType: 'html',
-                        success: function(d, status, xhr) {
-                            console.log('Request to ' + mobileUrl + ' => OK');
+                        headers: {
+                            'Content-Type': 'text/html'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                          },
+                        // data: {},
+                        // timeout: 5000,
+                        // dataType: 'html',
+                        // success: function(d, status, xhr) {
+                        //     console.log('Request to ' + mobileUrl + ' => OK');
                             
-                            var parser = new DOMParser(); 
-                            var responseDoc = parser.parseFromString(d, "text/html");
+                        //     var parser = new DOMParser(); 
+                        //     var responseDoc = parser.parseFromString(d, "text/html");
         
-                            var metaTags = responseDoc.head.getElementsByTagName('meta')
-                            Array.from(metaTags).forEach(metaTag => {
-                                if (metaTag.hasAttribute('property') &&
-                                    metaTag.getAttribute('property') === 'og:video')
-                                    {
-                                        var videoAddr = metaTag.getAttribute('content');
+                        //     var metaTags = responseDoc.head.getElementsByTagName('meta')
+                        //     Array.from(metaTags).forEach(metaTag => {
+                        //         if (metaTag.hasAttribute('property') &&
+                        //             metaTag.getAttribute('property') === 'og:video')
+                        //             {
+                        //                 var videoAddr = metaTag.getAttribute('content');
                                       
-                                        //var videoTag = document.createElement("video")
-                                        //videoTag.setAttribute('src', videoAddr);
-                                        //videoTag.setAttribute('controls', '');
-                                        //videoTag.setAttribute('loop', '');
-                                        //videoTag.setAttribute('height', screen.height * 70 / 100);
+                        //                 //var videoTag = document.createElement("video")
+                        //                 //videoTag.setAttribute('src', videoAddr);
+                        //                 //videoTag.setAttribute('controls', '');
+                        //                 //videoTag.setAttribute('loop', '');
+                        //                 //videoTag.setAttribute('height', screen.height * 70 / 100);
                                         
-                                        var videoTag = createVideoTag(videoAddr);
+                        //                 var videoTag = createVideoTag(videoAddr);
                                         
-                                        externalLink.replaceWith(videoTag);
-                                    }
-                            });
+                        //                 externalLink.replaceWith(videoTag);
+                        //             }
+                        //     });
                            
     
-                        },
-                        error: function(d) {
-                            externalLink.text = externalLink.text + '(Dead link)';
-                        }
+                        // },
+                        // error: function(d) {
+                        //     externalLink.text = externalLink.text + '(Dead link)';
+                        // }
                     }
                     
-                    PM.CrossOriginHttpRequest(config);
+                    PGE.HttpRequest.Send(config).then(response => {
+                        console.log('Request to ' + mobileUrl + ' => OK');
+                        
+                        var parser = new DOMParser(); 
+                        var responseDoc = parser.parseFromString(response.responseText, "text/html");
+    
+                        var metaTags = responseDoc.head.getElementsByTagName('meta')
+
+                        let success = false;
+                        Array.from(metaTags).forEach(metaTag => {
+                            if (metaTag.hasAttribute('property') &&
+                                metaTag.getAttribute('property') === 'og:video')
+                                {
+                                    var videoAddr = metaTag.getAttribute('content');
+                                    
+                                    //var videoTag = document.createElement("video")
+                                    //videoTag.setAttribute('src', videoAddr);
+                                    //videoTag.setAttribute('controls', '');
+                                    //videoTag.setAttribute('loop', '');
+                                    //videoTag.setAttribute('height', screen.height * 70 / 100);
+                                    
+                                    var videoTag = createVideoTag(videoAddr);
+                                    
+                                    externalLink.replaceWith(videoTag);
+
+                                    success = true;
+                                }
+                            }
+                        );
+
+                        if (!success) {
+                            externalLink.text = externalLink.text + '(Dead link)';
+                        }
+                    });
                 }
                 
                 if (href.includes('fb.watch/'))
                 {
                     var fbwatch = {
-                        type: 'GET',
+                        //type: 'GET',
+                        credentials: 'include',
                         url: href,
-                        data: {},
-                        timeout: 5000,
-                        dataType: 'html',
-                        testRedirection: true,
-                        success: function(data, redirectedURL) {
-                            console.log('Request to ' + href + ' => OK => Redirected to ' + redirectedURL);
-                            fbVideo(redirectedURL);
-                        },
-                        error: function(d) {
-                            externalLink.text = externalLink.text + '(Dead link)';
-                        }
+                        headers: {
+                            'Content-Type': 'text/html'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                          },
+                        // data: {},
+                        // timeout: 5000,
+                        // dataType: 'html',
+                        // testRedirection: true,
+                        // success: function(data, redirectedURL) {
+                        //     console.log('Request to ' + href + ' => OK => Redirected to ' + redirectedURL);
+                        //     fbVideo(redirectedURL);
+                        // },
+                        // error: function(d) {
+                        //     externalLink.text = externalLink.text + '(Dead link)';
+                        // }
                     }
                     
-                    PM.CrossOriginHttpRequest(fbwatch);
+                    PGE.HttpRequest.Send(fbwatch).then(response => {
+                        console.log('Request to ' + response.originUrl + ' => OK => Redirected to ' + response.url);
+                        fbVideo(response.url);
+                    });
                 }
                 else
                 {
@@ -339,7 +428,7 @@ async function insertTiktokVideo() {
 /*
 Auto resize image to 70% of screen height
 */
-PM.ActionElements('blockquote.messageText img', function(e) {
+PGE.Element.Action('blockquote.messageText img', function(e) {
     var recommendHeight = screen.height * 70 / 100;
     
     var cloneImg = e.cloneNode(true);
@@ -361,14 +450,17 @@ PM.ActionElements('blockquote.messageText img', function(e) {
     		value: recommendHeight + 'px'
     	},
 	];
-    PM.StyleElementsBySelector(e, styles);
+
+    styles.forEach(async style => {
+        e.style.setProperty(style.property, style.value);
+    })
 });
 
 
 /*
 Remove signatures
 */
-PM.RemoveElementsBySelector(".signature");
+PGE.Element.Action(".signature", e => e.remove());
 
 /*
 Fix scroll to a post on the same page
@@ -377,7 +469,7 @@ async function getAllPostIds()
 {
     var postIds = [];
     
-    await PM.ActionElements('li.message', function(post) {
+    await PGE.Element.Action('li.message', function(post) {
         var id = post.getAttribute('id');
         postIds.push(id);
     });
@@ -387,7 +479,7 @@ async function getAllPostIds()
 
 async function fixScrollForPosts(postIds)
 {
-    await PM.ActionElements('div.attribution a.AttributionLink', function (externalLink) {
+    await PGE.Element.Action('div.attribution a.AttributionLink', function (externalLink) {
         var href = externalLink.getAttribute('href');
         if (href.startsWith('goto/post?'))
         {
