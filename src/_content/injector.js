@@ -1,7 +1,7 @@
 const _injectorLog = new Log('ContentScript-Injector');
 
 
-function ExecuteInjector() {
+function InitializeInjector() {
     // Does not work due to Content security policy.
     //Injection_V2();
 
@@ -10,6 +10,9 @@ function ExecuteInjector() {
 
 function Injection_V1()
 {
+    //
+    // Initialize handler handling events from Web Page
+    //
     document.addEventListener("get_pge_scripts", function(e) {
         _injectorLog.Info('Receive query scripts from Web Page');
 
@@ -30,14 +33,24 @@ function Injection_V1()
     });
 
     //
-    // Begin injection
+    // Inject scripts to Web Page
     //
-    var s = document.createElement('script');
-    s.src = chrome.runtime.getURL('src/_content/injector/web-page-context.js');
-    // s.onload = function() {
-    //     this.remove();
-    // };
-    (document.head || document.documentElement).appendChild(s);
+    
+    // The order is important!
+    let scripts = [
+        'src/_content/web-resources/utility.js',
+        'src/_content/web-resources/http-request.js',
+        'src/_content/web-resources/pge-scripts.js',
+    ]
+
+    scripts.forEach(script => {
+        let s = document.createElement('script');
+        s.src = chrome.runtime.getURL(script);
+        // s.onload = function() {
+        //     this.remove();
+        // };
+        (document.head || document.documentElement).appendChild(s);
+    });
 }
 
 function Injection_V2()

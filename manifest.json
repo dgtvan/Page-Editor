@@ -11,7 +11,9 @@
     },
     "web_accessible_resources": [{
         "resources": [
-            "src/_content/injector/web-page-context.js"
+            "src/_content/web-resources/pge-scripts.js",
+            "src/_content/web-resources/http-request.js",
+            "src/_content/web-resources/utility.js"
         ],
         "matches": ["<all_urls>"]
     }],
@@ -25,7 +27,8 @@
         "js": [
             "src/common/log/log.js",
             "src/_content/service-waker.js",
-            "src/_content/injector/injector.js",
+            "src/_content/injector.js",
+            "src/_content/http-request-bridge.js",
             "src/_content/_main.js"
         ],
         "match_about_blank": true
@@ -42,6 +45,5 @@
         "<all_urls>"
     ],
     "content_security_policy": {
-        
     }
 }

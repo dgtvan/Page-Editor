@@ -2,7 +2,9 @@ const _log = new Log('ContentScript');
 
 InitializeServiceWaker();
 
-ExecuteInjector();
+InitializeInjector();
+
+InitializeHttpRequestBridge();
 
 
 // document.body.addEventListener("bridgeRequest", function(e) {
