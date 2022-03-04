@@ -38,7 +38,7 @@ function Injection_V1()
     
     // The order is important!
     let scripts = [
-        'src/_content/web-resources/utility.js',
+        'src/_content/web-resources/dom-element.js',
         'src/_content/web-resources/http-request.js',
         'src/_content/web-resources/pge-scripts.js',
     ]
