@@ -27,7 +27,9 @@ export function Initialize() {
 
 function HttpRequest(config) {
 
-    config['credentials'] = 'omit';
+    if (!config.hasOwnProperty('credentials')) {
+        config['credentials'] = 'omit';
+    }
 
     let responseObj = {
         originUrl: '',

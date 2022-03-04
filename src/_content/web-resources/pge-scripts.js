@@ -10,10 +10,7 @@ document.addEventListener("send_pge_scripts", function(e) {
         scriptTag.type = 'text/javascript';
         scriptTag.async = true;
 
-        let scriptContent = `
-        window.addEventListener('DOMContentLoaded', (event) => {` +
-            script.content
-        + `});`;
+        let scriptContent = `window.addEventListener('DOMContentLoaded', (event) => {` + script.content + `});`;
         scriptTag.innerHTML = scriptContent;
         
         
