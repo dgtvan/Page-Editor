@@ -9,7 +9,14 @@ document.addEventListener("send_pge_scripts", function(e) {
         let scriptTag = document.createElement('script');
         scriptTag.type = 'text/javascript';
         scriptTag.async = true;
-        scriptTag.innerHTML = script.content    
+
+        let scriptContent = `
+        window.addEventListener('DOMContentLoaded', (event) => {` +
+            script.content
+        + `});`;
+        scriptTag.innerHTML = scriptContent;
+        
+        
         document.head.appendChild(scriptTag);
     });
 
