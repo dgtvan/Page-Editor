@@ -10,6 +10,17 @@ function InitializeInjector() {
 
 function Injection_V1()
 {
+    const loadScript = function(url) {
+        return new Promise((resolve, reject) => {
+            let scriptTag = document.createElement('script');
+            scriptTag.onload = function() {
+                resolve();
+            }
+            scriptTag.src = chrome.runtime.getURL(url);
+            (document.head || document.documentElement).appendChild(scriptTag);
+        });
+    }
+
     //
     // Initialize handler handling events from Web Page
     //
@@ -37,25 +48,39 @@ function Injection_V1()
     //
     
     // The order is important!
-    let scripts = [
-        'src/_content/web-resources/dom-element.js',
-        'src/_content/web-resources/http-request.js',
-        'src/_content/web-resources/rotatable-video-control.js',
-        'src/_content/web-resources/pge-scripts.js',
-    ]
+    // let scripts = [
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    // ]
 
-    let pgeNamespace = document.createElement('script');
-    pgeNamespace.onload = function() {
+    // let pgeNamespace = document.createElement('script');
+    // pgeNamespace.onload = function() {
 
-        scripts.forEach(script => {
-            let scriptTag = document.createElement('script');
-            scriptTag.src = chrome.runtime.getURL(script);
-            (document.head || document.documentElement).appendChild(scriptTag);
-        });
+    //     scripts.forEach(script => {
+    //         let scriptTag = document.createElement('script');
+    //         scriptTag.src = chrome.runtime.getURL(script);
+    //         (document.head || document.documentElement).appendChild(scriptTag);
+    //     });
 
-    };
-    pgeNamespace.src = chrome.runtime.getURL('src/_content/web-resources/_pge-namespace.js');
-    (document.head || document.documentElement).appendChild(pgeNamespace);
+    // };
+    // pgeNamespace.src = chrome.runtime.getURL('src/_content/web-resources/_pge-namespace.js');
+    // (document.head || document.documentElement).appendChild(pgeNamespace);
+
+    loadScript('src/_content/web-resources/_pge-namespace.js')
+    .then(() => {
+        return Promise.allSettled([
+            loadScript('src/_content/web-resources/dom-element.js'),
+
+            loadScript('src/_content/web-resources/http-request.js')
+            .then(() => {
+                return loadScript('src/_content/web-resources/rotatable-video-control.js');
+            })
+        ]);
+    }).then(() => {
+        loadScript('src/_content/web-resources/pge-scripts-loader.js');
+    });
 }
 
 function Injection_V2()
