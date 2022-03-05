@@ -30,14 +30,16 @@ export function Initialize() {
 
 function HttpRequest(config) {
 
-    if (!config.hasOwnProperty('credentials')) {
+    // Never submit cookies along!
+    //if (!config.hasOwnProperty('credentials')) {
         config['credentials'] = 'omit';
-    }
+    //}
 
     let responseObj = {
         originUrl: '',
         url: '',
         responseText: '',
+        statusCode: null
     }
 
     responseObj['originUrl'] = config.url;
@@ -46,6 +48,7 @@ function HttpRequest(config) {
         fetch(config.url, config)
         .then(response => {
             responseObj['url'] = response.url;
+            responseObj['statusCode'] = response.status;
             return response.text();
         })
         .then(data => {

@@ -1,5 +1,6 @@
 const _HttpLog = new Log('ContentScript-HttpLog');
 
+// TODO: Create a config file
 const _whiteRoutes = [
     {
         'http://gamevn.com/' : [
@@ -40,8 +41,6 @@ function InitializeHttpRequestBridge() {
             {
                 let response = request.content;
 
-                _HttpLog.Info('DUMP ' + JSON.stringify(response));
-
                 if (IsRouteAllowed(response.response.url)) {
                     ForwardResponse(request.content);
                 } else {
@@ -81,11 +80,13 @@ function RespondEmpty(e) {
         emptyResponse = {
             originUrl: e.request.url,
             url: e.request.url,
-            responseText: ''
+            responseText: '',
+            blocked: true
         }
     } else {
         emptyResponse = e.response;
         emptyResponse.responseText = '';
+        emptyResponse.blocked = true;
     }
 
     var endScriptEvent = new CustomEvent("http_request_bridge_response", {

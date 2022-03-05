@@ -192,13 +192,6 @@ Auto insert video from tiktok/facebook
 
 function createVideoTag(videoAddr)
 {
-    //var videoTag = document.createElement("video")
-    //videoTag.setAttribute('src', videoAddr);
-    //videoTag.setAttribute('controls', '');
-    //videoTag.setAttribute('loop', '');
-    //videoTag.setAttribute('height', screen.height * 70 / 100);
-    
-    //<div class="v-video-container" video-src="videos/mikethefrog.mp4" video-height="204px"></div>
     var videoTag = document.createElement('video');
     videoTag.setAttribute('class', 'v-video-container');
     videoTag.setAttribute('src', videoAddr);
@@ -209,219 +202,107 @@ function createVideoTag(videoAddr)
 
 insertTiktokVideo();
 async function insertTiktokVideo() {
-    var postContents = Array.from(document.getElementsByClassName("messageText"));
-    if (postContents.length == 0) return;
-    await Promise.all(postContents.map(async (postContent) => {
-        var externalLinks = Array.from(postContent.getElementsByTagName('a'));
-        if (externalLinks.length == 0) return;
-        await Promise.all(externalLinks.map(async (externalLink) => {
-            var href = externalLink.getAttribute('href');
+    const getVideoProvider = url => {
+        if (url.startsWith('https://vt.tiktok.com') ||
+            url.startsWith('https://www.tiktok.com') ||
+            url.startsWith('https://vm.tiktok.com'))
+        {
+            return 'tiktok';
+        }
+
+        if (url.includes('/videos/') &&
+            (url.startsWith('https://www.facebook.com') || 
+             url.startsWith('https://facebook.com') ||
+             url.startsWith('http://www.facebook.com') ||
+             url.startsWith('http://facebook.com')))
+        {
+            return 'facebook';
+        }
+
+        if (url.startsWith('https://fb.watch/') ||
+            url.startsWith('https://www.fb.watch/'))
+        {
+            return 'facebook_shortlink';
+        }
+
+        return null;
+    }
+
+    const videoHandlers = {};
+    videoHandlers.tiktok = url => {
+        return PGE.HttpRequest.Send({url: url}).then(response => {
+            try
+            {
+                var parser = new DOMParser(); 
+                var responseDoc = parser.parseFromString(response.responseText, "text/html");
+
+                var persistedScript = responseDoc.getElementById('sigi-persisted-data');
+                persistedScript = persistedScript.innerText.substring("window['SIGI_STATE']=".length);
+                persistedScript = persistedScript.substring(0, persistedScript.indexOf("window['SIGI_RETRY']")-1);
+                
+                var scriptObject = JSON.parse(persistedScript);
+                
+                var videoId = scriptObject["ItemList"]["video"]["list"][0];
+                var videoInfo = scriptObject["ItemModule"][videoId]["video"];
+                var videoAddr = decodeURIComponent(videoInfo["playAddr"]);
+                
+                var videoTag = createVideoTag(videoAddr);
+                
+                return Promise.resolve(videoTag);
+            }
+            catch
+            {
+                return Promise.resolve(null);
+            }
+        });
+    }
+
+    videoHandlers.facebook = url => {
+        var mobileUrl = url;
             
-            if (href.startsWith('https://vt.tiktok.com') ||
-                href.startsWith('https://www.tiktok.com') ||
-                href.startsWith('https://vm.tiktok.com'))
-            {
-               
-                
-                var config = {
-                    type: 'GET',
-                    url: href,
-                    // data: {},
-                    // timeout: 5000,
-                    // dataType: 'html',
-                    // success: function(d, status, xhr) {
-                    //     //console.log(xhr);
-                    //     console.log('Request to ' + href + ' => OK');
-                        
-                    //     var parser = new DOMParser(); 
-                    //     var responseDoc = parser.parseFromString(d, "text/html");
-    
-                    //     var persistedScript = responseDoc.getElementById('sigi-persisted-data');
-                    //     persistedScript = persistedScript.innerText.substring("window['SIGI_STATE']=".length);
-                    //     persistedScript = persistedScript.substring(0, persistedScript.indexOf("window['SIGI_RETRY']")-1);
-                        
-                    //     var scriptObject = JSON.parse(persistedScript);
-                        
-                    //     var videoId = scriptObject["ItemList"]["video"]["list"][0];
-                    //     var videoInfo = scriptObject["ItemModule"][videoId]["video"];
-                    //     var videoAddr = decodeURIComponent(videoInfo["playAddr"]);
-                        
-                    //     var videoTag = createVideoTag(videoAddr);
-                        
-                    //     externalLink.replaceWith(videoTag);
-                    // },
-                    // error: function(d) {
-                    //     externalLink.text = externalLink.text + '(Dead link)';
-                    // }
-                }
-                
-                PGE.HttpRequest.Send(config).then(response => {
-                    console.log('Request to ' + href + ' => OK');
-                    
-                    try
-                    {
-                        var parser = new DOMParser(); 
-                        var responseDoc = parser.parseFromString(response.responseText, "text/html");
+        mobileUrl = mobileUrl.replace('//www.facebook.com', '//m.facebook.com')
+        mobileUrl = mobileUrl.replace('//facebook.com', '//m.facebook.com');
 
-                        var persistedScript = responseDoc.getElementById('sigi-persisted-data');
-                        persistedScript = persistedScript.innerText.substring("window['SIGI_STATE']=".length);
-                        persistedScript = persistedScript.substring(0, persistedScript.indexOf("window['SIGI_RETRY']")-1);
-                        
-                        var scriptObject = JSON.parse(persistedScript);
-                        
-                        var videoId = scriptObject["ItemList"]["video"]["list"][0];
-                        var videoInfo = scriptObject["ItemModule"][videoId]["video"];
-                        var videoAddr = decodeURIComponent(videoInfo["playAddr"]);
-                        
+        return PGE.HttpRequest.Send({url: mobileUrl}).then(response => {
+            var parser = new DOMParser(); 
+            var responseDoc = parser.parseFromString(response.responseText, "text/html");
+
+            var metaTags = responseDoc.head.getElementsByTagName('meta')
+            Array.from(metaTags).forEach(metaTag => {
+                if (metaTag.hasAttribute('property') &&
+                    metaTag.getAttribute('property') === 'og:video')
+                    {
+                        var videoAddr = metaTag.getAttribute('content');                            
                         var videoTag = createVideoTag(videoAddr);
-                        
-                        externalLink.replaceWith(videoTag);
+                        return Promise.resolve(videoTag);
                     }
-                    catch
-                    {
-                        externalLink.text = externalLink.text + '(Dead link)';
-                    }
-                });
-            }
-            else if ((
-                        (href.startsWith('https://www.facebook.com') || 
-                         href.startsWith('https://facebook.com') ||
-                         href.startsWith('http://www.facebook.com') ||
-                         href.startsWith('http://facebook.com'))
-
-                        && href.includes('/videos/')
-                    )
-                    ||
-                    (
-                        href.startsWith('https://fb.watch/') ||
-                        href.startsWith('https://www.fb.watch/')
-                    )
-                    )
-            {
-                var fbVideo = function(href) {
-                    var mobileUrl = href;
-                    
-                    mobileUrl = mobileUrl.replace('//www.facebook.com', '//m.facebook.com')
-                    mobileUrl = mobileUrl.replace('//facebook.com', '//m.facebook.com');
-    
-                    var config = {
-                        //type: 'GET',
-                        credentials: 'include',
-                        url: mobileUrl,
-                        headers: {
-                            'Content-Type': 'text/html'
-                            // 'Content-Type': 'application/x-www-form-urlencoded',
-                          },
-                        // data: {},
-                        // timeout: 5000,
-                        // dataType: 'html',
-                        // success: function(d, status, xhr) {
-                        //     console.log('Request to ' + mobileUrl + ' => OK');
-                            
-                        //     var parser = new DOMParser(); 
-                        //     var responseDoc = parser.parseFromString(d, "text/html");
-        
-                        //     var metaTags = responseDoc.head.getElementsByTagName('meta')
-                        //     Array.from(metaTags).forEach(metaTag => {
-                        //         if (metaTag.hasAttribute('property') &&
-                        //             metaTag.getAttribute('property') === 'og:video')
-                        //             {
-                        //                 var videoAddr = metaTag.getAttribute('content');
-                                      
-                        //                 //var videoTag = document.createElement("video")
-                        //                 //videoTag.setAttribute('src', videoAddr);
-                        //                 //videoTag.setAttribute('controls', '');
-                        //                 //videoTag.setAttribute('loop', '');
-                        //                 //videoTag.setAttribute('height', screen.height * 70 / 100);
-                                        
-                        //                 var videoTag = createVideoTag(videoAddr);
-                                        
-                        //                 externalLink.replaceWith(videoTag);
-                        //             }
-                        //     });
-                           
-    
-                        // },
-                        // error: function(d) {
-                        //     externalLink.text = externalLink.text + '(Dead link)';
-                        // }
-                    }
-                    
-                    PGE.HttpRequest.Send(config).then(response => {
-                        console.log('Request to ' + mobileUrl + ' => OK');
-                        
-                        var parser = new DOMParser(); 
-                        var responseDoc = parser.parseFromString(response.responseText, "text/html");
-    
-                        var metaTags = responseDoc.head.getElementsByTagName('meta')
-
-                        let success = false;
-                        Array.from(metaTags).forEach(metaTag => {
-                            if (metaTag.hasAttribute('property') &&
-                                metaTag.getAttribute('property') === 'og:video')
-                                {
-                                    var videoAddr = metaTag.getAttribute('content');
-                                    
-                                    //var videoTag = document.createElement("video")
-                                    //videoTag.setAttribute('src', videoAddr);
-                                    //videoTag.setAttribute('controls', '');
-                                    //videoTag.setAttribute('loop', '');
-                                    //videoTag.setAttribute('height', screen.height * 70 / 100);
-                                    
-                                    var videoTag = createVideoTag(videoAddr);
-                                    
-                                    externalLink.replaceWith(videoTag);
-
-                                    success = true;
-                                }
-                            }
-                        );
-
-                        if (!success) {
-                            externalLink.text = externalLink.text + '(Dead link)';
-                        }
-                    });
                 }
-                
-                if (href.includes('fb.watch/'))
-                {
-                    var fbwatch = {
-                        //type: 'GET',
-                        credentials: 'include',
-                        url: href,
-                        headers: {
-                            'Content-Type': 'text/html'
-                            // 'Content-Type': 'application/x-www-form-urlencoded',
-                          },
-                        // data: {},
-                        // timeout: 5000,
-                        // dataType: 'html',
-                        // testRedirection: true,
-                        // success: function(data, redirectedURL) {
-                        //     console.log('Request to ' + href + ' => OK => Redirected to ' + redirectedURL);
-                        //     fbVideo(redirectedURL);
-                        // },
-                        // error: function(d) {
-                        //     externalLink.text = externalLink.text + '(Dead link)';
-                        // }
-                    }
-                    
-                    PGE.HttpRequest.Send(fbwatch).then(response => {
-                        console.log('Request to ' + response.originUrl + ' => OK => Redirected to ' + response.url);
-                        fbVideo(response.url);
-                    });
+            );
+            return Promise.resolve(null);
+        });
+    }
+
+    videoHandlers.facebook_shortlink = url => {
+        return PGE.HttpRequest.Send({url: url}).then(response => {
+            console.log('Request to ' + response.originUrl + ' => OK => Redirected to ' + response.url);
+            return videoHandlers.facebook(response.url);
+        });
+    }
+
+    PGE.Element.Action('.messageText a', externalLink => {
+        let href = externalLink.getAttribute('href');
+
+        const videoProvider = getVideoProvider(href);
+        if (videoProvider != null) {
+            videoHandlers[videoProvider](href).then(videoTag => {
+                if (videoTag == null) { 
+                    externalLink.innerText = externalLink.innerText + '(Can not hot link)';
+                } else {
+                    externalLink.replaceWith(videoTag);
                 }
-                else
-                {
-                    fbVideo(href);
-                }
-            }
-            else
-            {
-                // Do nothing
-            }
-        }));
-    }));
+            });
+        }
+    });
 }
 
 
@@ -465,41 +346,36 @@ PGE.Element.Action(".signature", e => e.remove());
 /*
 Fix scroll to a post on the same page
 */
-async function getAllPostIds()
-{
-    var postIds = [];
-    
-    await PGE.Element.Action('li.message', function(post) {
-        var id = post.getAttribute('id');
-        postIds.push(id);
-    });
-    
-    return postIds;
-}
-
-async function fixScrollForPosts(postIds)
-{
-    await PGE.Element.Action('div.attribution a.AttributionLink', function (externalLink) {
-        var href = externalLink.getAttribute('href');
-        if (href.startsWith('goto/post?'))
-        {
-           var targetId = href.substring(href.indexOf('#')+1);
-            if (postIds.indexOf(targetId) != -1)
-            {
-                externalLink.addEventListener('click', function() {
-                    document.getElementById(targetId).scrollIntoView({ block: 'start',  behavior: 'smooth' });
-                });
-            }
-        }
-    });
-}
-
-
+fixScroll();
 async function fixScroll()
 {
-    const postIds = await getAllPostIds();
-    await fixScrollForPosts(postIds);
-}
+    const _allPosts = async function() {
+        var postIds = [];
+        
+        await PGE.Element.Action('li.message', function(post) {
+            var id = post.getAttribute('id');
+            postIds.push(id);
+        });
+        
+        return postIds;
+    }
 
-fixScroll();
+    const _fixScroll = async function(postIds) {
+        await PGE.Element.Action('div.attribution a.AttributionLink', function (externalLink) {
+            var href = externalLink.getAttribute('href');
+            if (href.startsWith('goto/post?'))
+            {
+            var targetId = href.substring(href.indexOf('#')+1);
+                if (postIds.indexOf(targetId) != -1)
+                {
+                    externalLink.addEventListener('click', function() {
+                        document.getElementById(targetId).scrollIntoView({ block: 'start',  behavior: 'smooth' });
+                    });
+                }
+            }
+        });
+    }
+
+    _fixScroll(await _allPosts());
+}
 

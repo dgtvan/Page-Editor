@@ -1,5 +1,3 @@
-var PGE=PGE || {};
-
 PGE.HttpRequest = class {
     static #document = null;
     static #ajaxDict = {};

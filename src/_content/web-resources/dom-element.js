@@ -1,5 +1,3 @@
-var PGE=PGE || {};
-
 PGE.Element = class {
 
     static Action = async function(selector, callback)

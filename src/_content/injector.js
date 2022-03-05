@@ -44,14 +44,18 @@ function Injection_V1()
         'src/_content/web-resources/pge-scripts.js',
     ]
 
-    scripts.forEach(script => {
-        let s = document.createElement('script');
-        s.src = chrome.runtime.getURL(script);
-        // s.onload = function() {
-        //     this.remove();
-        // };
-        (document.head || document.documentElement).appendChild(s);
-    });
+    let pgeNamespace = document.createElement('script');
+    pgeNamespace.onload = function() {
+
+        scripts.forEach(script => {
+            let scriptTag = document.createElement('script');
+            scriptTag.src = chrome.runtime.getURL(script);
+            (document.head || document.documentElement).appendChild(scriptTag);
+        });
+
+    };
+    pgeNamespace.src = chrome.runtime.getURL('src/_content/web-resources/_pge-namespace.js');
+    (document.head || document.documentElement).appendChild(pgeNamespace);
 }
 
 function Injection_V2()
