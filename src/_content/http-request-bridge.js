@@ -1,30 +1,125 @@
 const _HttpLog = new Log('ContentScript-HttpLog');
 
+const _whiteRoutes = [
+    {
+        'http://gamevn.com/' : [
+            "https://raw.githubusercontent.com/VanDng/",
+            "https://www.facebook.com/",
+            "https://facebook.com/",
+            "https://fb.watch/",
+            "https://www.fb.watch/",
+            "https://m.facebook.com/",
+            "https://www.tiktok.com/",
+            "https://vt.tiktok.com/",
+            "https://vm.tiktok.com/"
+        ]
+    }
+]
+
 function InitializeHttpRequestBridge() {
     //
     // Forward HTTP Request from Web Page to Service Worker
     //
     document.addEventListener("http_request_bridge_request", function(e) {
-        _HttpLog.Info('Forward Request \'' + e.detail.request.url + '\'. Tag \'' + e.detail.tag + '\'');
+        let request = e.detail;
 
-        chrome.runtime.sendMessage({
-            message: 'http_request_bridge_request',
-            content: e.detail
-        },
-        
+        if (IsRouteAllowed(request.request.url)) {
+            ForwardRequest(request);
+        } else {
+            _HttpLog.Error('Request to \'' + request.request.url + '\'. Tag \'' + request.tag + '\' is blocked');
+            RespondEmpty(request);
+        }
+    });
+
     //
     // Forward HTTP Response from Service Worker to Web page
-    //    
-        response => {
-            _HttpLog.Info('Forward Response \'' + e.detail.request.url + '\'. Tag \'' + e.detail.tag + '\'');
+    //
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+            if (request.message === "http_request_bridge_response")
+            {
+                let response = request.content;
 
-            var endScriptEvent = new CustomEvent("http_request_bridge_response", {
-                detail: {
-                    response: response.response,
-                    tag: response.tag
+                _HttpLog.Info('DUMP ' + JSON.stringify(response));
+
+                if (IsRouteAllowed(response.response.url)) {
+                    ForwardResponse(request.content);
+                } else {
+                    _HttpLog.Error('Response from \'' + response.response.url + '\'. Tag \'' + response.tag + '\' is blocked');
+                    RespondEmpty(response);
                 }
-            });
-            document.dispatchEvent(endScriptEvent);
+            }
+        }
+    );
+}
+
+function ForwardRequest(request) {
+    _HttpLog.Info('Forward Request \'' + request.request.url + '\'. Tag \'' + request.tag + '\'');
+
+    chrome.runtime.sendMessage({
+        message: 'http_request_bridge_request',
+        content: request
+    });
+}
+
+function ForwardResponse(response) {
+    _HttpLog.Info('Forward Response \'' + response.response.url + '\'. Tag \'' + response.tag + '\'');
+
+    var endScriptEvent = new CustomEvent("http_request_bridge_response", {
+        detail: {
+            response: response.response,
+            tag: response.tag
+        }
+    });
+    document.dispatchEvent(endScriptEvent);
+}
+
+function RespondEmpty(e) {
+    let emptyResponse = {};
+
+    if (e.hasOwnProperty('request')) {
+        emptyResponse = {
+            originUrl: e.request.url,
+            url: e.request.url,
+            responseText: ''
+        }
+    } else {
+        emptyResponse = e.response;
+        emptyResponse.responseText = '';
+    }
+
+    var endScriptEvent = new CustomEvent("http_request_bridge_response", {
+        detail: {
+            response: emptyResponse,
+            tag: e.tag
+        }
+    });
+    document.dispatchEvent(endScriptEvent);
+}
+
+function IsRouteAllowed(destination) {
+    let _from = window.location.href;
+    let _to = destination;
+
+    let isAllow = false;
+
+    _whiteRoutes.forEach(rule => {
+        Object.keys(rule).forEach(from => {
+
+            if (_from.startsWith(from)) {
+    
+                rule[from].forEach(to => {
+    
+                    if (_to.startsWith(to)) {
+                        isAllow = true;
+                    }
+    
+                });
+    
+            } 
+    
         });
     });
+
+    return isAllow;
 }

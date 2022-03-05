@@ -13,7 +13,6 @@ document.addEventListener("send_pge_scripts", function(e) {
         let scriptContent = `window.addEventListener('DOMContentLoaded', (event) => {` + script.content + `});`;
         scriptTag.innerHTML = scriptContent;
         
-        
         document.head.appendChild(scriptTag);
     });
 

@@ -15,9 +15,12 @@ export function Initialize() {
 
                     _log.Info('Send response \'' + httpRequest.request.url + '\'. Tag \'' + httpRequest.tag + '\'');
 
-                    sendResponse({
-                        response: response,
-                        tag: httpRequest.tag
+                    chrome.tabs.sendMessage(sender.tab.id, {
+                        message: 'http_request_bridge_response',
+                        content: {
+                            response: response,
+                            tag: httpRequest.tag
+                        }
                     });
                 });
             }
