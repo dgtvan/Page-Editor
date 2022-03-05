@@ -14,7 +14,11 @@ It is basically similar to other projects having the similar core features. Howe
   - [ ] Check an element is in viewport. https://www.javascripttutorial.net/dom/css/check-if-an-element-is-visible-in-the-viewport/
   - [ ] Remove elements by QuerySelector
   - [ ] Style elements by QuerySelector
-- [ ] Visual Studio Code as an external editor.
+- [X] Visual Studio Code as an external editor. Require to install [PageEditor extension](https://github.com/VanDng/PageEditor-VSCode) for VS Code.
+  - [X] Auto reload the browser.
+  - [X] Auto creation connection between the browser and VS Code.
+  ![1dpRWULC1N](https://user-images.githubusercontent.com/20492454/156877467-15f2d5fd-9252-41ea-8e43-09a9e314863c.gif)
+
 
 # Thanks
 
