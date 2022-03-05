@@ -1,6 +1,6 @@
 # Page Editor
 
-It helps to inject custom javascript scripts to any web page.
+A Google Chrome extension which enable to inject custom javascript scripts to any web page.
 
 **Visual Studio Code** is integrated as an external powerful editor!
 
