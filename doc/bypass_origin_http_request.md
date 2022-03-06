@@ -15,7 +15,7 @@ Same origin policy
 <img src="https://raw.githubusercontent.com/VanDng/Page-Editor/main/doc/mixed_content_blocked.png" width="80%"/>
 </p>
 
-What if I still want to break it?
+Is there any way to lessen the restriction?
 
 ## Answer
 
@@ -35,5 +35,5 @@ Obviously, `Service worker context` is my choice, all I need to do now is to pas
 Breaking the same origin policy is taking the risk of being vulnerable but in control.
 
 I managed to low the risk by two implementations:
-1. In `Service worker context`, requests are made by the `fetch` function with `credentials` is always set by `omit` . By that configuration, [sensitive cookies as well as other data are not sent along any requets](https://developer.mozilla.org/en-US/docs/Web/API/fetch#parameters).
-2. There is a whitelist of routes. Any requet/response comming to/from domain that is not in the whitelist is blocked at the `content script context`. I will whitelist a route as long as I need it. It prevents scripts, which are not mine, leverage my implementation of cross-origin HTTP Request in the `page context`.
+1. In `Service worker context`, requests are made by the `fetch` function with `credentials` is set by `omit` as **default**. By that configuration, [sensitive cookies as well as other data are not sent along any requets](https://developer.mozilla.org/en-US/docs/Web/API/fetch#parameters). However, I let it be configurable. Maybe, I need it occasionally.
+2. There is a whitelist of routes. Any requet/response comming to/from a domain/URL that is not in the whitelist is blocked at the `content script context`. I will whitelist a route only if I need and trust it. It prevents scripts, which are not mine, leverage my implementation of cross-origin HTTP Request in the `page context`.
