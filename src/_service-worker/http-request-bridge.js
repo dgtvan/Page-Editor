@@ -30,10 +30,9 @@ export function Initialize() {
 
 function HttpRequest(config) {
 
-    // Never submit cookies along!
-    //if (!config.hasOwnProperty('credentials')) {
+    if (!config.hasOwnProperty('credentials')) {
         config['credentials'] = 'omit';
-    //}
+    }
 
     let responseObj = {
         originUrl: '',
