@@ -1,3 +1,16 @@
+/*-Page-Editor-
+urls=https://www.instagram.com/*
+-Page-Editor-*/
+
+setInterval(function() {
+    PGE.Element.Action("a[href='/explore/people/']", e => {
+        e.parentElement.parentElement.style.setProperty('opacity', '0');
+        e.parentElement.parentElement.style.setProperty('height', '0px');
+        e.parentElement.parentElement.style.setProperty('margin', '0px');
+        e.parentElement.parentElement.style.setProperty('padding', '0px');
+    });
+}, 500);
+
 setInterval(function() {
     var timeTags = document.getElementsByTagName("time");
     Array.from(timeTags).forEach(timeTag => {
@@ -22,9 +35,8 @@ setInterval(function() {
             articleTag.getAttribute('role') === 'presentation' &&
             articleTag.hasAttribute(tagProcessed) === false)
         {
-           //articleTag.childNodes[0].childNodes[2].remove();
-           
-           //articleTag.setAttribute(tagProcessed, '');
+           articleTag.childNodes[0].childNodes[2].remove();
+           articleTag.setAttribute(tagProcessed, '');
         }
     });
 }, 500)

@@ -25,7 +25,8 @@ document.addEventListener("send_pge_scripts", function(e) {
 
         scriptTag.innerHTML = scriptContent;
         
-        document.head.appendChild(scriptTag);
+        //document.head.appendChild(scriptTag);
+        (document.head || document.documentElement).appendChild(scriptTag);
     });
 
 });

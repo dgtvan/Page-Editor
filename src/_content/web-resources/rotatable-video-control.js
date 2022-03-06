@@ -26,8 +26,8 @@ PGE.HttpRequest.Send({
         
         scriptTag.innerHTML = scriptContent;
         
-        document.head.appendChild(scriptTag);
-        
+        //document.head.appendChild(scriptTag);
+        (document.head || document.documentElement).appendChild(scriptTag);
     }
 
 });
