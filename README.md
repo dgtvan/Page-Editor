@@ -1,6 +1,6 @@
 # Page Editor
 
-A Google Chrome extension which enables to inject custom javascript scripts to any web page. Its users are more like developers rather than non-technical users.
+A Google Chrome extension which enables to inject custom javascript scripts to any web page.
 
 **Visual Studio Code** is integrated as an external powerful editor!
 
@@ -22,8 +22,40 @@ VS Code is required to open only if I want to update my scripts.
 <img src="doc/script_storage.png" width="70%"/>
 </p>
 
+# Script Configuration
 
-# Usage
+- Each script file has it own configuration section beginning with `\*-Page-Editor-` and ending with `-Page-Editor-*/`. This section should be put at the top of script files.
+- Configurations are pairs of key and value.
+
+Example:
+```
+\*-Page-Editor-
+urls=foo.com
+-Page-Editor-*/
+```
+
+Available configuration.
+1. `urls`
+- List of urls that the script will be injected to.
+- The list items are separated by semicolons.
+- Urls can be matching by rules below:
+  - `all` means any URL.
+  - Ending by `*` means any url begins with the specified url.
+  - Otherwise, exact same matching.
+
+Example:
+```
+urls=foo.com;bar.com/foo/*
+URLs below are affected:
+- foo.com
+- Any url starts with bar.com/foo/
+
+urls=all;foo.com;bar.com;
+All urls are affected.
+```
+
+
+# Setup
 
 1. Open Google Chrome browser, load the extension in Developer mode.
 2. Open Visual Studio Code, install another [Page Editor extension](https://github.com/VanDng/PageEditor-VSCode).
