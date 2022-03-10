@@ -6,9 +6,6 @@ In-use features:
 - [X] Auto reload the browser on script change.
 - [X] Auto create connection between the browser and VS Code. Open VS Code and start writing right away!
 
-Todo:
-- [ ] Thinking... ~
-
 <p align="center">
 <img src="https://raw.githubusercontent.com/VanDng/Page-Editor/main/doc/vscode_example.gif" width="100%"/>
 </p>
