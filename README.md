@@ -73,3 +73,4 @@ All urls are affected.
 # Thanks
 
 1/ Icons is downloaded from [FlatIcon](https://www.flaticon.com/).
+2/ The project has been re-written based on the starter project https://github.com/chibat/chrome-extension-typescript-starter.
